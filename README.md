@@ -149,3 +149,5 @@ Apache-2.0
 The standard LoRA Stacker in Nunchaku had poor usability, so it was reimplemented with an easy-to-use interface featuring height adjustment like efficiency-nodes-comfyui. By separating it as an independent Custom Node, it can be operated stably without being affected by updates to the main Nunchaku package.
 
 This implementation uses both Python and JavaScript, making it a high-difficulty implementation that requires logic to load JavaScript implementing widget functionality from the Python side.
+
+
