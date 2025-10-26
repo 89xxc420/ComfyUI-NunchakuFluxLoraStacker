@@ -18,12 +18,18 @@ License: Apache-2.0
 import logging
 import os
 
+# Version information
+__version__ = "1.0.0"
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Import the LoRA Stack node
 from .nodes.lora.flux import NunchakuFluxLoraStack
+
+# Add version to class for ComfyUI Manager
+NunchakuFluxLoraStack.__version__ = __version__
 
 # Node class mappings
 NODE_CLASS_MAPPINGS = {
@@ -38,7 +44,10 @@ NODE_DISPLAY_NAME_MAPPINGS = {
 # Register JavaScript extensions
 WEB_DIRECTORY = "js"
 
-__all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
+# Make version available at module level for ComfyUI Manager
+VERSION = __version__
+
+__all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "__version__", "VERSION"]
 
 logger.info("=" * (80 + len(" ComfyUI-NunchakuFluxLoraStacker Initialization ")))
 logger.info("ComfyUI-NunchakuFluxLoraStacker: Loading Nunchaku FLUX LoRA Stacker nodes...")
