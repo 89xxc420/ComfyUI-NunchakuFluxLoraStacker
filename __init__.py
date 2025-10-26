@@ -28,13 +28,14 @@ logger = logging.getLogger(__name__)
 # Import the LoRA Stack node
 from .nodes.lora.flux import NunchakuFluxLoraStack
 
-# Add version to class for ComfyUI Manager
-NunchakuFluxLoraStack.__version__ = __version__
-
 # Node class mappings
 NODE_CLASS_MAPPINGS = {
     "FluxLoraMultiLoader": NunchakuFluxLoraStack,
 }
+
+# Add version to all node classes for ComfyUI Manager
+for node_class in NODE_CLASS_MAPPINGS.values():
+    node_class.__version__ = __version__
 
 # Node display name mappings
 NODE_DISPLAY_NAME_MAPPINGS = {
