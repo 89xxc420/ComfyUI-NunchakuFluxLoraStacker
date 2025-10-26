@@ -18,7 +18,7 @@ License: Apache-2.0
 import logging
 import os
 
-# Version information
+# Version information - must be at module level for ComfyUI Manager
 __version__ = "1.0.0"
 
 # Configure logging
