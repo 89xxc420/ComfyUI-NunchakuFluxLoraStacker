@@ -10,6 +10,6 @@ requires-python = ">=3.10, <3.13"
 Repository = "https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker"
 
 [tool.comfy]
-PublisherId = "nunchaku-flux-lora-stacker"
+PublisherId = "4ded3f8e-5d39-4cc7-b2f9-3a679bd5638d"
 DisplayName = "ComfyUI-NunchakuFluxLoraStacker"
 Icon = "https://raw.githubusercontent.com/nunchaku-tech/nunchaku/96615bd93a1f0d2cf98039fddecfec43ce34cc96/assets/nunchaku.svg"
