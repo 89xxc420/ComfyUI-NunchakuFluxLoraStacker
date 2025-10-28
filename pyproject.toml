@@ -1,6 +1,6 @@
 [project]
 name = "ComfyUI-NunchakuFluxLoraStacker"
-version = "1.0.0"
+version = "1.0.1"
 description = "A standalone ComfyUI custom node for Nunchaku FLUX LoRA Stacking with dynamic UI control."
 authors = [{ name = "ussoewwin" }]
 license = { file = "LICENSE" }
