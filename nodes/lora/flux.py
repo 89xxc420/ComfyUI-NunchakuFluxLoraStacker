@@ -204,115 +204,76 @@ class NunchakuFluxLoraStack:
 
             loras_to_apply.append((lora_name, lora_strength))
 
-        # If no LoRAs need to be applied, return the original model
-        if not loras_to_apply:
-            return (model,)
-
-        model_wrapper = model.model.diffusion_model
-        
-        # Check if it's a ComfyFluxWrapper (from either our wrapper or the original nunchaku wrapper)
-        # Handle torch.compile() optimized modules
-        if hasattr(model_wrapper, '_orig_mod'):
-            # This is a torch._dynamo.eval_frame.OptimizedModule
-            actual_wrapper = model_wrapper._orig_mod
-            wrapper_class_name = type(actual_wrapper).__name__
-            if wrapper_class_name != 'ComfyFluxWrapper':
-                raise ValueError(f"Model structure not recognized. Expected ComfyFluxWrapper, got {type(actual_wrapper)} (wrapped in OptimizedModule)")
-            print(f"DEBUG: Using {wrapper_class_name} from {type(actual_wrapper).__module__} (wrapped in OptimizedModule)")
-        else:
-            wrapper_class_name = type(model_wrapper).__name__
-            if wrapper_class_name != 'ComfyFluxWrapper':
-                raise ValueError(f"Model structure not recognized. Expected ComfyFluxWrapper, got {type(model_wrapper)}")
-            print(f"DEBUG: Using {wrapper_class_name} from {type(model_wrapper).__module__}")
-
-        # Get transformer from the correct location (handle OptimizedModule)
-        if hasattr(model_wrapper, '_orig_mod'):
-            # This is an OptimizedModule - we need to avoid deepcopy completely
-            transformer = model_wrapper._orig_mod.model
-            # Create a new model structure manually for OptimizedModule
-            # We can't use deepcopy due to QuantizedFluxModel, so create a new model instance
-            # Create a new ModelPatcher with the same parameters as the original
-            ret_model = model.__class__(model.model, model.load_device, model.offload_device, model.size, model.weight_inplace_update)
-            ret_model.model = model.model
-            # Clear object_patches to prevent conflicts with diffusion_model reassignment
-            ret_model.object_patches = {}
-            # For OptimizedModule, we need to create a new ComfyFluxWrapper manually
-            # Create a new ComfyFluxWrapper with the same parameters as the original
-            original_wrapper = model_wrapper._orig_mod
-            ret_model_wrapper = ComfyFluxWrapper(
-                transformer, 
-                original_wrapper.config,
-                original_wrapper.pulid_pipeline,
-                original_wrapper.customized_forward,
-                original_wrapper.forward_kwargs
-            )
-            # Copy internal state from original wrapper
-            ret_model_wrapper._prev_timestep = original_wrapper._prev_timestep
-            ret_model_wrapper._cache_context = original_wrapper._cache_context
-            if hasattr(original_wrapper, '_original_time_text_embed'):
-                ret_model_wrapper._original_time_text_embed = original_wrapper._original_time_text_embed
-            ret_model.model.diffusion_model = ret_model_wrapper
-        else:
-            transformer = model_wrapper.model
-            model_wrapper.model = None
-            # We can't use deepcopy due to QuantizedFluxModel, so create a new model instance
-            # Create a new ModelPatcher with the same parameters as the original
-            ret_model = model.__class__(model.model, model.load_device, model.offload_device, model.size, model.weight_inplace_update)
-            # Clear object_patches to prevent conflicts with diffusion_model reassignment
-            ret_model.object_patches = {}
-            # Create a new ComfyFluxWrapper manually for non-OptimizedModule case too
-            original_wrapper = model_wrapper
-            ret_model_wrapper = ComfyFluxWrapper(
-                transformer, 
-                original_wrapper.config,
-                original_wrapper.pulid_pipeline,
-                original_wrapper.customized_forward,
-                original_wrapper.forward_kwargs
-            )
-            # Copy internal state from original wrapper
-            ret_model_wrapper._prev_timestep = original_wrapper._prev_timestep
-            ret_model_wrapper._cache_context = original_wrapper._cache_context
-            if hasattr(original_wrapper, '_original_time_text_embed'):
-                ret_model_wrapper._original_time_text_embed = original_wrapper._original_time_text_embed
-            ret_model.model.diffusion_model = ret_model_wrapper
-        
-        # Check if it's a ComfyFluxWrapper (from either our wrapper or the original nunchaku wrapper)
-        ret_wrapper_class_name = type(ret_model_wrapper).__name__
-        if ret_wrapper_class_name != 'ComfyFluxWrapper':
-            raise ValueError(f"Ret model structure not recognized. Expected ComfyFluxWrapper, got {type(ret_model_wrapper)}")
-        
-        print(f"DEBUG: Using {ret_wrapper_class_name} from {type(ret_model_wrapper).__module__}")
-
-        # Restore transformer to the original wrapper (important for original model integrity)
-        if hasattr(model_wrapper, '_orig_mod'):
-            model_wrapper._orig_mod.model = transformer
-        else:
-            model_wrapper.model = transformer
-        
-        # Set transformer to the new wrapper (maintain original code structure)
-        ret_model_wrapper.model = transformer
-
-        # Clear existing LoRA list
-        ret_model_wrapper.loras = []
-
-        # Track the maximum input channels needed
-        max_in_channels = ret_model.model.model_config.unet_config["in_channels"]
-
-        # Add all LoRAs
+        # Step 3: Format LoRA list (deduplicate, filter empty)
+        loras_formatted = []
+        seen = set()
         for lora_name, lora_strength in loras_to_apply:
-            lora_path = folder_paths.get_full_path_or_raise("loras", lora_name)
-            ret_model_wrapper.loras.append((lora_path, lora_strength))
+            if lora_name and lora_name not in seen:
+                loras_formatted.append((lora_name, lora_strength))
+                seen.add(lora_name)
 
-            # Check if input channels need to be updated
-            sd = to_diffusers(lora_path)
-            if "transformer.x_embedder.lora_A.weight" in sd:
-                new_in_channels = sd["transformer.x_embedder.lora_A.weight"].shape[1]
-                assert new_in_channels % 4 == 0
-                new_in_channels = new_in_channels // 4
-                max_in_channels = max(max_in_channels, new_in_channels)
+        print(f"DEBUG: Applying {len(loras_formatted)} LoRAs")
 
-        # Update the model's input channels
-        if max_in_channels > ret_model.model.model_config.unet_config["in_channels"]:
-            ret_model.model.model_config.unet_config["in_channels"] = max_in_channels
+        # Step 1: Extract actual model from OptimizedModule if needed
+        model_wrapper = model.model.diffusion_model
+        actual_model_wrapper = model_wrapper._orig_mod if hasattr(model_wrapper, "_orig_mod") else model_wrapper
 
+        # Step 2: Determine model type
+        wrapper_class_name = type(actual_model_wrapper).__name__
+        print(f"DEBUG: Detected model type: {wrapper_class_name}")
+
+        if wrapper_class_name not in ("ComfyFluxWrapper", "NunchakuFluxTransformer2dModel"):
+            raise ValueError(
+                f"Model structure not recognized. Expected ComfyFluxWrapper or NunchakuFluxTransformer2dModel, "
+                f"got {type(actual_model_wrapper)}"
+            )
+
+        ret_model = model
+        ret_model_wrapper = actual_model_wrapper
+
+        # Step 4: Handle ComfyFluxWrapper case
+        if wrapper_class_name == "ComfyFluxWrapper":
+            print("DEBUG: Using ComfyFluxWrapper LoRA application method")
+            ret_model_wrapper.loras = []
+
+            for lora_name, lora_strength in loras_formatted:
+                lora_path = folder_paths.get_full_path_or_raise("loras", lora_name)
+                ret_model_wrapper.loras.append((lora_path, lora_strength))
+                print(f"DEBUG: Added LoRA {lora_name} with strength {lora_strength}")
+
+        # Step 5: Handle NunchakuFluxTransformer2dModel case
+        elif wrapper_class_name == "NunchakuFluxTransformer2dModel":
+            print("DEBUG: Using NunchakuFluxTransformer2dModel LoRA application method")
+
+            if loras_formatted:
+                from nunchaku.lora.flux.compose import compose_lora as nunchaku_compose_lora
+
+                lora_tuples = []
+                for lora_name, lora_strength in loras_formatted:
+                    lora_path = folder_paths.get_full_path_or_raise("loras", lora_name)
+                    lora_tuples.append((lora_path, lora_strength))
+                    print(f"DEBUG: Preparing LoRA {lora_name} at {lora_path}")
+
+                if len(lora_tuples) == 1:
+                    lora_path, lora_strength = lora_tuples[0]
+                    ret_model_wrapper.update_lora_params(lora_path)
+                    ret_model_wrapper.set_lora_strength(lora_strength)
+                    print(f"DEBUG: Applied single LoRA with strength {lora_strength}")
+                else:
+                    composed_lora = nunchaku_compose_lora(lora_tuples)
+                    ret_model_wrapper.update_lora_params(composed_lora)
+                    print(f"DEBUG: Applied {len(lora_tuples)} composed LoRAs")
+            else:
+                ret_model_wrapper.update_lora_params(None)
+                print("DEBUG: Cleared LoRA params")
+
+        # Step 6: Validate returned model
+        ret_wrapper_class_name = type(ret_model_wrapper).__name__
+        if ret_wrapper_class_name not in ("ComfyFluxWrapper", "NunchakuFluxTransformer2dModel"):
+            raise ValueError(
+                f"Returned model structure not recognized. Expected ComfyFluxWrapper or NunchakuFluxTransformer2dModel, "
+                f"got {type(ret_model_wrapper)}"
+            )
+
+        print(f"DEBUG: Successfully applied LoRA using {ret_wrapper_class_name}")
         return (ret_model,)
