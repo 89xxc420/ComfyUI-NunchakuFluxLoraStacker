@@ -61,6 +61,10 @@ The node automatically:
 - Nunchaku FLUX models
 - LoRA files compatible with Nunchaku FLUX
 
+## Release History
+
+- [v1.10](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/releases/tag/v1.10) – LoRA Loader Fix - Complete Version
+
 ## License
 
 Apache-2.0
