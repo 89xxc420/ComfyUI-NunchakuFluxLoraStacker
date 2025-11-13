@@ -16,12 +16,7 @@ A standalone ComfyUI custom node for stacking up to ten Nunchaku FLUX LoRAs with
    cd ComfyUI/custom_nodes
    git clone https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker.git
    ```
-2. Install Python dependencies (ensures `nunchaku` package is present in your ComfyUI environment):
-   ```bash
-   cd ComfyUI/custom_nodes/ComfyUI-NunchakuFluxLoraStacker
-   pip install -r requirements.txt
-   ```
-3. Restart ComfyUI to load the node.
+2. Restart ComfyUI to load the node.
 
 ## Usage
 
@@ -57,12 +52,12 @@ A standalone ComfyUI custom node for stacking up to ten Nunchaku FLUX LoRAs with
 ## Requirements
 
 - ComfyUI (2024 builds or newer recommended)
-- `nunchaku>=1.0.0`
+- Nunchaku core package (`nunchaku`) already installed in the environment
 - LoRA files compatible with Nunchaku FLUX
 
 ## Release History
 
-- v1.11 – Updated installation instructions to include dependency installation (`pip install -r requirements.txt`). ([Issue #3](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/issues/3))
+- v1.11 – Clarified installation instructions for environments where the `nunchaku` package is already provided. ([Issue #3](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/issues/3))
 - [v1.10](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/releases/tag/v1.10) – LoRA Loader Fix - Complete Version
 
 ## License
