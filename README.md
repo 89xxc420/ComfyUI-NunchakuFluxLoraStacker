@@ -1,64 +1,63 @@
 # ComfyUI-NunchakuFluxLoraStacker
 
-A standalone ComfyUI custom node for Nunchaku FLUX LoRA Stacking with dynamic UI control.
+A standalone ComfyUI custom node for stacking up to ten Nunchaku FLUX LoRAs with dynamic UI control.
 
 ## Features
 
-- **Dynamic UI Control**: Automatically adjusts the number of visible LoRA slots based on `lora_count` parameter
-- **Input Mode Support**: 
-  - **Simple Mode**: Shows only LoRA name and weight
-  - **Advanced Mode**: Shows separate model and clip strengths
-- **Up to 10 LoRAs**: Support for applying multiple LoRAs simultaneously
-- **Automatic Height Adjustment**: Node height adjusts dynamically based on visible widgets
-- **Nunchaku FLUX Compatible**: Designed specifically for Nunchaku FLUX models
+- **Dynamic Slot Visibility**: LoRA widget count follows `lora_count`
+- **Simple / Advanced Modes**: Toggle between single-strength and dual-strength inputs
+- **Automatic Layout Sizing**: Node height expands or shrinks to match visible widgets
+- **Nunchaku FLUX Ready**: Purpose-built for the Nunchaku FLUX checkpoint format
 
 ## Installation
 
-1. Clone this repository to your ComfyUI custom_nodes directory:
-```bash
-cd ComfyUI/custom_nodes
-git clone https://github.com/your-username/ComfyUI-NunchakuFluxLoraStacker.git
-```
-
-2. Restart ComfyUI
+1. Clone the repository inside your `ComfyUI/custom_nodes` directory:
+   ```bash
+   cd ComfyUI/custom_nodes
+   git clone https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker.git
+   ```
+2. Install Python dependencies (ensures `nunchaku` package is present in your ComfyUI environment):
+   ```bash
+   cd ComfyUI/custom_nodes/ComfyUI-NunchakuFluxLoraStacker
+   pip install -r requirements.txt
+   ```
+3. Restart ComfyUI to load the node.
 
 ## Usage
 
-### Basic Usage
+### Basic Flow
 
-1. Add a **Nunchaku FLUX LoRA Stack** node to your workflow
-2. Connect your Nunchaku FLUX model to the `model` input
-3. Set the `lora_count` to control how many LoRA slots are visible
-4. Choose your `input_mode`:
-   - **Simple**: Use `lora_wt_X` for overall strength
-   - **Advanced**: Use `model_str_X` and `clip_str_X` for separate strengths
-5. Select LoRA files and set their strengths
-6. Connect the output to your next node
+1. Add the **Nunchaku FLUX LoRA Stack** node to your workflow.
+2. Connect the Nunchaku FLUX base model to the `model` input.
+3. Set `lora_count` to the number of LoRA slots you want active.
+4. Choose `input_mode`:
+   - **simple**: Use `lora_wt_X` for all-in-one strength control.
+   - **advanced**: Use `model_str_X` and `clip_str_X` for separate strength control.
+5. Pick the LoRA file in each active slot and configure the strengths.
+6. Connect the output to the next node in your graph.
 
 ### Parameters
 
-- **model**: The Nunchaku FLUX model to apply LoRAs to
-- **input_mode**: 
-  - `simple`: Shows only LoRA name and weight
-  - `advanced`: Shows separate model and clip strengths
-- **lora_count**: Number of LoRA slots to process (1-10)
-- **lora_name_X**: LoRA file name for slot X
-- **lora_wt_X**: Overall strength for LoRA X (simple mode)
-- **model_str_X**: Model strength for LoRA X (advanced mode)
-- **clip_str_X**: CLIP strength for LoRA X (advanced mode)
+- **model**: Nunchaku FLUX base model.
+- **input_mode**
+  - `simple`: Display LoRA name and a single strength slider.
+  - `advanced`: Display separate model and CLIP strength sliders.
+- **lora_count**: Number of LoRA slots to use (1-10).
+- **lora_name_X**: LoRA file for slot X.
+- **lora_wt_X**: Overall LoRA strength in simple mode.
+- **model_str_X** / **clip_str_X**: Individual strengths in advanced mode.
 
 ## Dynamic UI Behavior
 
-The node automatically:
-- Shows/hides LoRA slots based on `lora_count`
-- Shows/hides strength widgets based on `input_mode`
-- Adjusts node height to fit visible widgets
-- Updates in real-time when parameters change
+- Toggle LoRA slots based on `lora_count`.
+- Switch between strength widgets depending on `input_mode`.
+- Resize node height to match the visible widget stack.
+- Refresh the layout immediately when parameters change.
 
 ## Requirements
 
-- ComfyUI
-- Nunchaku FLUX models
+- ComfyUI (2024 builds or newer recommended)
+- `nunchaku>=1.0.0`
 - LoRA files compatible with Nunchaku FLUX
 
 ## Release History
@@ -71,4 +70,4 @@ Apache-2.0
 
 ## Credits
 
-Based on efficiency-nodes-comfyui implementation with dynamic UI control.
+Based on the dynamic UI implementation from efficiency-nodes-comfyui.
