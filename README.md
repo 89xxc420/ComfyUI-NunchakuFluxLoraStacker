@@ -52,12 +52,12 @@ A standalone ComfyUI custom node for stacking up to ten Nunchaku FLUX LoRAs with
 ## Requirements
 
 - ComfyUI (2024 builds or newer recommended)
-- Nunchaku core package (`nunchaku`) already installed in the environment
+- Nunchaku core package (`nunchaku`) installed separately in the environment
 - LoRA files compatible with Nunchaku FLUX
 
 ## Release History
 
-- v1.11 – Clarified installation instructions for environments where the `nunchaku` package is already provided. ([Issue #3](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/issues/3))
+- v1.11 – Corrected the README clone command to use the canonical repository URL. ([Issue #3](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/issues/3))
 - [v1.10](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/releases/tag/v1.10) – LoRA Loader Fix - Complete Version
 
 ## License
