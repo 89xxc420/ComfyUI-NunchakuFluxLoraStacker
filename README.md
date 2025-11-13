@@ -62,7 +62,7 @@ A standalone ComfyUI custom node for stacking up to ten Nunchaku FLUX LoRAs with
 
 ## Release History
 
-- v1.11 – Updated installation instructions to include dependency installation (`pip install -r requirements.txt`). See [Issue #3](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/issues/3) for details.
+- v1.11 – Updated installation instructions to include dependency installation (`pip install -r requirements.txt`). ([Issue #3](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/issues/3))
 - [v1.10](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/releases/tag/v1.10) – LoRA Loader Fix - Complete Version
 
 ## License
