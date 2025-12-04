@@ -1,11 +1,10 @@
 # ComfyUI-NunchakuFluxLoraStacker
 
-This repository provides **two independent custom nodes** for ComfyUI:
+This repository provides **three independent custom nodes** for ComfyUI:
 
 1. **FLUX LoRA Loader V2** (`FluxLoraMultiLoader_10`) - Dynamic multi-LoRA loading with combo box UI for Nunchaku FLUX models
-2. **Fast Groups Bypasser V2** (`FastGroupsBypasserV2`) - Group-based node control utility (ported from [rgthree-comfy](https://github.com/rgthree/rgthree-comfy))
-
-**Note:** Fast Groups Bypasser V2 is unrelated to LoRA functionality and is included as a workflow management utility.
+2. **LoRA Stacker V2** (`LoraStackerV2_10`) - Universal LoRA loader for standard SD models (SDXL, Flux, WAN2.2, etc.) with dynamic 10-slot UI
+3. **Fast Groups Bypasser V2** (`FastGroupsBypasserV2`) - Group-based node control utility (ported from [rgthree-comfy](https://github.com/rgthree/rgthree-comfy))
 
 ---
 
@@ -81,10 +80,10 @@ V1 nodes (`NunchakuFluxLoraStack`) remain available for:
 
 This repository now includes two major V2 nodes with enhanced functionality:
 
-### 1. FLUX LoRA Loader V2 (`FluxLoraMultiLoader_10`)
+### 1. FLUX LoRA Loader V2 (`FluxLoraMultiLoader_1` ~ `FluxLoraMultiLoader_10`)
 
 #### Features
-- **Single Dynamic Node**: One node with adjustable slot count (1-10)
+- **10 Fixed Slot Variants**: Choose from x1 to x10 based on your needs
 - **Combo Box Selector**: Select visible LoRA count (1-10) dynamically via dropdown
 - **Auto Height Adjustment**: Node resizes automatically to fit visible slots
 - **No Validation Errors**: All LoRA inputs are optional; hidden slots don't cause errors
@@ -122,6 +121,7 @@ This repository now includes two major V2 nodes with enhanced functionality:
 
 ## Release History
 
+- v1.16 – LoRA Stacker V2: Added universal LoRA loader for standard SD models (SDXL, Flux, WAN2.2) with dynamic 10-slot UI ([Release Notes](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/releases/tag/v1.16))
 - v1.15 – FastGroupsBypasserV2 Fix: Fixed critical widget update bug where second property change required F5 refresh ([Release Notes](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/releases/tag/v1.15))
 - [v1.14](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/releases/tag/v1.14) – Node Simplification: Removed test nodes (x1-x9), keeping only FLUX LoRA Loader V2 (x10) as the production node
 - v1.13 – Clean Release: Removed all backup files from repository, updated FluxLoraMultiLoader_10 display name to "FLUX LoRA Loader V2"
@@ -132,6 +132,8 @@ This repository now includes two major V2 nodes with enhanced functionality:
 ## License
 
 Apache-2.0
+
+The MIT License (Fast Groups Bypasser V2)
 
 ## Credits
 
