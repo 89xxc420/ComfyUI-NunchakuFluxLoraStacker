@@ -69,7 +69,7 @@ app.registerExtension({
 
             const count = parseInt(this.properties["visibleLoraCount"] || 1);
             const controlWidget = ensureControlWidget();
-
+        
             // Physical widget reconstruction for clean layout
             this.widgets = [controlWidget];
 
