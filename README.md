@@ -91,7 +91,7 @@ This repository now includes two major V2 nodes with enhanced functionality:
 - **Workflow Persistence**: Settings are saved and restored correctly
 
 #### Usage
-1. Add **FLUX LoRA Loader (x10)** node to your workflow
+1. Add **FLUX LoRA Loader V2** node to your workflow
 2. Use the **"🔢 LoRA Count"** dropdown to select how many slots you want visible
 3. Configure LoRA files and strengths for visible slots only
 4. Hidden slots are physically removed from UI (no padding waste)
@@ -122,6 +122,7 @@ This repository now includes two major V2 nodes with enhanced functionality:
 
 ## Release History
 
+- v1.13 – Clean Release: Removed all backup files from repository, updated FluxLoraMultiLoader_10 display name to "FLUX LoRA Loader V2"
 - v1.12 – V2 Nodes Release: FLUX LoRA Loader V2 with dynamic combo box UI and Fast Groups Bypasser V2
 - v1.11 – Corrected the README clone command to use the canonical repository URL. ([Issue #3](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/issues/3))
 - [v1.10](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/releases/tag/v1.10) – LoRA Loader Fix - Complete Version
