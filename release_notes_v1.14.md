@@ -2,8 +2,6 @@
 
 ---
 
-## Overview: From 10 Nodes to 1
-
 This release removes test nodes (x1-x9) and keeps only the production-ready **FLUX LoRA Loader V2** (x10).                                                      
 
 **Major Changes:**
