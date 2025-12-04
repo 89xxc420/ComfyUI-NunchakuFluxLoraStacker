@@ -1,11 +1,11 @@
 import { app } from "../../scripts/app.js";
 
-// Constants - コピー from rgthree
+// Constants - Copied from rgthree
 const MODE_ALWAYS = 0;
 const MODE_MUTE = 2;
 const MODE_BYPASS = 4;
 
-// Property Keys - コピー from rgthree
+// Property Keys - Copied from rgthree
 const PROPERTY_SORT = "sort";
 const PROPERTY_SORT_CUSTOM_ALPHA = "customSortAlphabet";
 const PROPERTY_MATCH_COLORS = "matchColors";
@@ -15,7 +15,7 @@ const PROPERTY_SHOW_ALL_GRAPHS = "showAllGraphs";
 const PROPERTY_RESTRICTION = "toggleRestriction";
 const PROPERTY_MODE = "effectMode";
 
-// Simple service to schedule refresh - rgthreeのFAST_GROUPS_SERVICEを簡易実装
+// Simple service to schedule refresh - Simplified implementation of rgthree's FAST_GROUPS_SERVICE
 class SimpleRefreshService {
     constructor() {
         this.nodes = [];
@@ -45,7 +45,7 @@ class SimpleRefreshService {
             if (this.nodes.length > 0) {
                 this.scheduleRefresh();
             }
-        }, 500);
+        }, 100);
     }
     
     refresh() {
@@ -62,14 +62,14 @@ const SERVICE = new SimpleRefreshService();
 app.registerExtension({
     name: "nunchakufluxlorastacker.fast_groups_bypass_v2.fixed",
     
-    // rgthreeと同じ: beforeRegisterNodeDefでプロパティ定義
+    // Same as rgthree: Property definition in beforeRegisterNodeDef
     async beforeRegisterNodeDef(nodeType, nodeData, app) {
         if (nodeData.name === "FastGroupsBypasserV2") {
-            // プロパティ定義 - rgthreeから完全コピー
-            nodeType["@matchColors"] = { type: "string" };
-            nodeType["@matchTitle"] = { type: "string" };
-            nodeType["@showNav"] = { type: "boolean" };
-            nodeType["@showAllGraphs"] = { type: "boolean" };
+            // Property definitions - Exact copy from rgthree
+                nodeType["@matchColors"] = { type: "string" };
+                nodeType["@matchTitle"] = { type: "string" };
+                nodeType["@showNav"] = { type: "boolean" };
+                nodeType["@showAllGraphs"] = { type: "boolean" };
             nodeType["@sort"] = {
                 type: "combo",
                 values: ["position", "alphanumeric", "custom alphabet"]
@@ -84,13 +84,13 @@ app.registerExtension({
                 values: ["Bypass", "Mute"]
             };
 
-            // 右クリックメニューに項目を追加（prototypeに追加）
+            // Add items to right-click menu (add to prototype)
             const origGetExtraMenuOptions = nodeType.prototype.getExtraMenuOptions;
             nodeType.prototype.getExtraMenuOptions = function(canvas, options) {
                 const r = origGetExtraMenuOptions ? origGetExtraMenuOptions.apply(this, arguments) : options;
                 
                 r.push(
-                    null, // セパレーター
+                    null, // Separator
                     {
                         content: "🎨 Edit Match Colors",
                         callback: () => {
@@ -120,11 +120,11 @@ app.registerExtension({
         }
     },
 
-    // rgthreeと同じ: nodeCreatedで初期化
+    // Same as rgthree: Initialization in nodeCreated
     nodeCreated(node) {
         if (node.comfyClass !== "FastGroupsBypasserV2") return;
 
-        // プロパティ初期化 - rgthreeから完全コピー
+        // Property initialization - Exact copy from rgthree
         if (!node.properties) node.properties = {};
         if (node.properties[PROPERTY_MATCH_COLORS] === undefined) node.properties[PROPERTY_MATCH_COLORS] = "";
         if (node.properties[PROPERTY_MATCH_TITLE] === undefined) node.properties[PROPERTY_MATCH_TITLE] = "";
@@ -138,20 +138,13 @@ app.registerExtension({
         node.serialize_widgets = false;
         node.removed = false;
         
-        // 固定ウィジェット数を追跡（削除しないウィジェット）
-        node.fixedWidgetsCount = 0;
-
-        // refreshWidgets - rgthreeから完全コピー（簡略版）
         node.refreshWidgets = function() {
-            console.log("[FastBypassV2] refreshWidgets called");
-            console.log("[FastBypassV2] properties:", this.properties);
             if (!app || !app.graph) return;
             const graph = app.graph;
             
             let groups = [];
             if (graph._groups) groups = [...graph._groups];
             
-            // Sort - rgthreeのロジック
             const sortMode = this.properties[PROPERTY_SORT] || "position";
             if (sortMode === "custom alphabet") {
                 const alphaStr = (this.properties[PROPERTY_SORT_CUSTOM_ALPHA] || "").replace(/\n/g, "");
@@ -160,36 +153,31 @@ app.registerExtension({
                         ? alphaStr.toLowerCase().split(",").map(s => s.trim())
                         : alphaStr.toLowerCase().trim().split("");
                     
-                    groups.sort((a, b) => {
-                        const titleA = (a.title || "").toLowerCase();
-                        const titleB = (b.title || "").toLowerCase();
-                        let idxA = alphabet.findIndex(prefix => titleA.startsWith(prefix));
-                        let idxB = alphabet.findIndex(prefix => titleB.startsWith(prefix));
+                groups.sort((a, b) => {
+                    const titleA = (a.title || "").toLowerCase();
+                    const titleB = (b.title || "").toLowerCase();
+                    let idxA = alphabet.findIndex(prefix => titleA.startsWith(prefix));
+                    let idxB = alphabet.findIndex(prefix => titleB.startsWith(prefix));
                         if (idxA !== -1 && idxB !== -1) {
                             const ret = idxA - idxB;
                             if (ret === 0) return titleA.localeCompare(titleB);
                             return ret;
                         }
-                        if (idxA !== -1) return -1;
-                        if (idxB !== -1) return 1;
-                        return titleA.localeCompare(titleB);
-                    });
+                    if (idxA !== -1) return -1;
+                    if (idxB !== -1) return 1;
+                    return titleA.localeCompare(titleB);
+                });
                 }
             } else if (sortMode === "alphanumeric") {
                 groups.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
             } else {
-                // position
                 groups.sort((a, b) => {
                     if (Math.abs(a.pos[1] - b.pos[1]) > 50) return a.pos[1] - b.pos[1];
                     return a.pos[0] - b.pos[0];
                 });
             }
 
-            // Filter by color - rgthreeのロジック
-            console.log("[FastBypassV2] matchColors:", this.properties[PROPERTY_MATCH_COLORS]);
-            console.log("[FastBypassV2] matchTitle:", this.properties[PROPERTY_MATCH_TITLE]);
             let filterColors = (this.properties[PROPERTY_MATCH_COLORS] || "").split(",").filter(c => c.trim());
-            console.log("[FastBypassV2] filterColors:", filterColors);
             if (filterColors.length) {
                 filterColors = filterColors.map(color => {
                     color = color.trim().toLowerCase();
@@ -204,10 +192,8 @@ app.registerExtension({
                 });
             }
             
-            // Filter groups - rgthreeのロジック
             let filteredGroups = [];
             for (const group of groups) {
-                // Color filter
                 if (filterColors.length) {
                     let groupColor = (group.color || "").replace("#", "").trim().toLowerCase();
                     if (!groupColor) continue;
@@ -218,7 +204,6 @@ app.registerExtension({
                     if (!filterColors.includes(groupColor)) continue;
                 }
                 
-                // Title filter
                 const matchTitle = (this.properties[PROPERTY_MATCH_TITLE] || "").trim();
                 if (matchTitle) {
                     try {
@@ -229,7 +214,6 @@ app.registerExtension({
                     }
                 }
                 
-                // showAllGraphs filter
                 const showAllGraphs = this.properties[PROPERTY_SHOW_ALL_GRAPHS];
                 if (!showAllGraphs && graph !== app.canvas.graph) {
                     continue;
@@ -238,9 +222,46 @@ app.registerExtension({
                 filteredGroups.push(group);
             }
 
-            // Update widgets - rgthreeのロジックを完全コピー
-            // 固定ウィジェットの後から開始
-            let index = this.fixedWidgetsCount || 0;
+            let index = 0;
+            
+            let editColorsBtn = this.widgets.find(w => w.name === "🎨 Edit Match Colors");
+            if (!editColorsBtn) {
+                editColorsBtn = this.addWidget("button", "🎨 Edit Match Colors", null, () => {
+                    const currentValue = this.properties[PROPERTY_MATCH_COLORS] || "";
+                    const newValue = prompt("Match Colors (comma separated, e.g. red,blue,#ff0000):", currentValue);
+                    if (newValue !== null) {
+                        this.properties[PROPERTY_MATCH_COLORS] = newValue;
+                        this.refreshWidgets();
+                    }
+                });
+            }
+            if (editColorsBtn && this.widgets[index] !== editColorsBtn) {
+                const oldIndex = this.widgets.findIndex(w => w === editColorsBtn);
+                if (oldIndex !== -1) {
+                    this.widgets.splice(index, 0, this.widgets.splice(oldIndex, 1)[0]);
+                }
+            }
+            index++;
+            
+            let editTitleBtn = this.widgets.find(w => w.name === "📝 Edit Match Title");
+            if (!editTitleBtn) {
+                editTitleBtn = this.addWidget("button", "📝 Edit Match Title", null, () => {
+                    const currentValue = this.properties[PROPERTY_MATCH_TITLE] || "";
+                    const newValue = prompt("Match Title (regex pattern):", currentValue);
+                    if (newValue !== null) {
+                        this.properties[PROPERTY_MATCH_TITLE] = newValue;
+                        this.refreshWidgets();
+                    }
+                });
+            }
+            if (editTitleBtn && this.widgets[index] !== editTitleBtn) {
+                const oldIndex = this.widgets.findIndex(w => w === editTitleBtn);
+                if (oldIndex !== -1) {
+                    this.widgets.splice(index, 0, this.widgets.splice(oldIndex, 1)[0]);
+                }
+            }
+            index++;
+            
             for (const group of filteredGroups) {
                 const title = group.title || "Group";
                 const widgetName = `Enable: ${title}`;
@@ -248,48 +269,30 @@ app.registerExtension({
                 let widget = this.widgets ? this.widgets.find(w => w.name === widgetName) : null;
                 
                 if (!widget) {
-                    // 新規ウィジェット作成
                     const isEnabled = isGroupEnabled.call(this, group);
                     widget = this.addWidget("toggle", widgetName, isEnabled, (v) => {});
-                    if (widget) {
-                        widget.callback = (v) => handleToggle.call(this, group, v, widget);
-                    }
-                } else {
-                    // 既存ウィジェットのcallback更新
-                    widget.callback = (v) => handleToggle.call(this, group, v, widget);
                 }
                 
-                // ウィジェットの位置を正しいインデックスに移動 - rgthreeの重要なロジック
-                if (widget && this.widgets[index] !== widget) {
-                    const oldIndex = this.widgets.findIndex(w => w === widget);
-                    if (oldIndex !== -1) {
-                        this.widgets.splice(index, 0, this.widgets.splice(oldIndex, 1)[0]);
+                if (widget) {
+                    widget.callback = (v) => handleToggle.call(this, group, v, widget);
+                    
+                    if (this.widgets[index] !== widget) {
+                        const oldIndex = this.widgets.findIndex(w => w === widget);
+                        if (oldIndex !== -1) {
+                            this.widgets.splice(index, 0, this.widgets.splice(oldIndex, 1)[0]);
+                        }
                     }
                 }
                 
                 index++;
             }
             
-            // index以降の余分なウィジェットを削除
-            // removeWidgetはwidgetオブジェクトまたはindexを受け付けるが、安全のためwidgetオブジェクトを使用
             while ((this.widgets || [])[index]) {
-                const widgetToRemove = this.widgets[index];
-                if (widgetToRemove) {
-                    this.removeWidget(widgetToRemove);
-                } else {
-                    break;
-                }
+                this.removeWidget(this.widgets[index]);
             }
 
-            console.log("[FastBypassV2] Filtered groups count:", filteredGroups.length);
-            console.log("[FastBypassV2] Final index:", index);
-            console.log("[FastBypassV2] Total widgets after update:", this.widgets ? this.widgets.length : 0);
-            console.log("[FastBypassV2] Widget names:", this.widgets ? this.widgets.map(w => w.name) : []);
-
-            // Resize
-            if (index > 0) {
-                this.setSize(this.computeSize());
-            }
+            this.setSize(this.computeSize());
+            if (app.canvas) app.canvas.setDirty(true, true);
         };
 
         // Helper functions
@@ -313,7 +316,9 @@ app.registerExtension({
 
         function isGroupEnabled(group) {
             const nodes = getNodesInGroup(group);
-            if (nodes.length === 0) return true;
+            if (nodes.length === 0) return true; 
+            // Check if ANY node is active (MODE_ALWAYS). 
+            // If so, the toggle should be ON.
             return nodes.some(n => n.mode === MODE_ALWAYS);
         }
 
@@ -327,13 +332,25 @@ app.registerExtension({
             
             const nodes = getNodesInGroup(group);
             let changed = false;
+            
+            // IMPORTANT: Batch operation to prevent multiple graph updates
+            graph.change(); // Begin transaction
+            
             nodes.forEach(n => {
                 if (n.id !== this.id && n.mode !== targetMode) {
                     n.mode = targetMode;
                     changed = true;
                 }
             });
-            if (changed) graph.setDirtyCanvas(true, true);
+            
+            graph.change(); // End transaction
+            
+            if (changed) {
+                // Use requestAnimationFrame to coalesce updates
+                requestAnimationFrame(() => {
+                   app.canvas.setDirty(true, true);
+                });
+            }
         }
 
         function handleToggle(group, newValue, widget) {
@@ -376,7 +393,7 @@ app.registerExtension({
             }
         }
 
-        // プロパティ変更時に即座にリフレッシュ
+        // Immediate refresh on property change
         node.onPropertyChanged = function(property, value) {
             if ([PROPERTY_MATCH_COLORS, PROPERTY_MATCH_TITLE, PROPERTY_SORT, PROPERTY_SORT_CUSTOM_ALPHA].includes(property)) {
                 this.refreshWidgets();
@@ -396,9 +413,9 @@ app.registerExtension({
             return true;
         };
 
-        // 右クリックメニュー項目はbeforeRegisterNodeDefで追加済み
+        // Right-click menu items already added in beforeRegisterNodeDef
 
-        // rgthreeと同じ: サービスに登録
+        // Same as rgthree: Register to service
         const origOnAdded = node.onAdded;
         node.onAdded = function(graph) {
             SERVICE.addNode(this);
@@ -412,29 +429,7 @@ app.registerExtension({
             if (origOnRemoved) origOnRemoved.call(this);
         };
 
-        // プロパティ編集用のボタンウィジェットを最初に追加（削除されないように）
-        const editColorsBtn = node.addWidget("button", "🎨 Edit Match Colors", null, () => {
-            const currentValue = node.properties[PROPERTY_MATCH_COLORS] || "";
-            const newValue = prompt("Match Colors (comma separated, e.g. red,blue,#ff0000):", currentValue);
-            if (newValue !== null) {
-                node.properties[PROPERTY_MATCH_COLORS] = newValue;
-                node.onPropertyChanged && node.onPropertyChanged(PROPERTY_MATCH_COLORS, newValue);
-            }
-        });
-        
-        const editTitleBtn = node.addWidget("button", "📝 Edit Match Title", null, () => {
-            const currentValue = node.properties[PROPERTY_MATCH_TITLE] || "";
-            const newValue = prompt("Match Title (regex pattern):", currentValue);
-            if (newValue !== null) {
-                node.properties[PROPERTY_MATCH_TITLE] = newValue;
-                node.onPropertyChanged && node.onPropertyChanged(PROPERTY_MATCH_TITLE, newValue);
-            }
-        });
-        
-        // 固定ウィジェット数を記録（これらは削除しない）
-        node.fixedWidgetsCount = node.widgets ? node.widgets.length : 0;
-
-        // Initial
+        // Add property editing button widgets first (so they are not removed)
         setTimeout(() => {
             node.refreshWidgets();
             if (node.graph) {
