@@ -1,5 +1,3 @@
-# v1.12: ComfyUI Nodes 2.0 Support - Dynamic LoRA Loader and Fast Groups Bypasser
-
 **Release Date:** December 4, 2025
 
 **Major Changes:**
