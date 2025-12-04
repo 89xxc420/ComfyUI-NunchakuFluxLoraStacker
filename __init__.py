@@ -15,25 +15,30 @@ logger = logging.getLogger(__name__)
 
 # Import nodes
 from .nodes.lora.flux import NunchakuFluxLoraStack
-from .nodes.lora.flux_v2 import GENERATED_NODES, GENERATED_DISPLAY_NAMES
+from .nodes.lora.flux_v2 import GENERATED_NODES as FLUX_NODES, GENERATED_DISPLAY_NAMES as FLUX_NAMES
+from .nodes.lora.standard import GENERATED_NODES as STANDARD_LORA_NODES, GENERATED_DISPLAY_NAMES as STANDARD_LORA_NAMES
 from .nodes.misc_v2 import NODE_CLASS_MAPPINGS as MISC_NODES, NODE_DISPLAY_NAME_MAPPINGS as MISC_NAMES
 
 # Add version to classes
 NunchakuFluxLoraStack.__version__ = __version__
-for node_class in GENERATED_NODES.values():
+for node_class in FLUX_NODES.values():
+    node_class.__version__ = __version__
+for node_class in STANDARD_LORA_NODES.values():
     node_class.__version__ = __version__
 
 # Node mappings
 NODE_CLASS_MAPPINGS = {
     "FluxLoraMultiLoader": NunchakuFluxLoraStack,
-    **GENERATED_NODES, # Merge generated nodes
+    **FLUX_NODES,
+    **STANDARD_LORA_NODES,
     **MISC_NODES
 }
 
 # Display name mappings
 NODE_DISPLAY_NAME_MAPPINGS = {
     "FluxLoraMultiLoader": "FLUX LoRA Multi Loader (Legacy - Do Not Use in V2)",
-    **GENERATED_DISPLAY_NAMES, # Merge generated display names
+    **FLUX_NAMES,
+    **STANDARD_LORA_NAMES,
     **MISC_NAMES
 }
 
