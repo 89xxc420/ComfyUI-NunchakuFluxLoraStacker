@@ -1,8 +1,15 @@
 # ComfyUI-NunchakuFluxLoraStacker
 
-A standalone ComfyUI custom node for stacking up to ten Nunchaku FLUX LoRAs with dynamic UI control.
+This repository provides **two independent custom nodes** for ComfyUI:
 
-## Features
+1. **FLUX LoRA Loader V2** (`FluxLoraMultiLoader_1` ~ `FluxLoraMultiLoader_10`) - Dynamic multi-LoRA loading with combo box UI for Nunchaku FLUX models
+2. **Fast Groups Bypasser V2** (`FastGroupsBypasserV2`) - Group-based node control utility (ported from [rgthree-comfy](https://github.com/rgthree/rgthree-comfy))
+
+**Note:** Fast Groups Bypasser V2 is unrelated to LoRA functionality and is included as a workflow management utility.
+
+---
+
+## Features (V1 - Legacy Node)
 
 - **Dynamic Slot Visibility**: LoRA widget count follows `lora_count`
 - **Simple / Advanced Modes**: Toggle between single-strength and dual-strength inputs
