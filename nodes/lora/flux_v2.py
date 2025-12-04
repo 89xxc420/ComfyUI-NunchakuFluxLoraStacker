@@ -103,22 +103,16 @@ class FluxLoraMultiLoaderBase:
 GENERATED_NODES = {}
 GENERATED_DISPLAY_NAMES = {}
 
-# Generate nodes for 1 to 10 slots
-for i in range(1, 11):
-    class_name = f"FluxLoraMultiLoader_{i}"
-    # FluxLoraMultiLoader_10 gets special V2 name, others keep x{i} format
-    if i == 10:
-        title = "FLUX LoRA Loader V2"
-        display_name = "FLUX LoRA Loader V2"
-    else:
-        title = f"FLUX LoRA Loader (x{i})"
-        display_name = f"FLUX LoRA Loader (x{i})"
-    
-    node_class = type(class_name, (FluxLoraMultiLoaderBase,), {
-        "_slot_count": i,
-        "TITLE": title,
-        "DESCRIPTION": f"Load up to {i} LoRAs."
-    })
-    
-    GENERATED_NODES[class_name] = node_class
-    GENERATED_DISPLAY_NAMES[class_name] = display_name
+# Generate only FluxLoraMultiLoader_10 (V2)
+class_name = "FluxLoraMultiLoader_10"
+title = "FLUX LoRA Loader V2"
+display_name = "FLUX LoRA Loader V2"
+
+node_class = type(class_name, (FluxLoraMultiLoaderBase,), {
+    "_slot_count": 10,
+    "TITLE": title,
+    "DESCRIPTION": "Load up to 10 LoRAs."
+})
+
+GENERATED_NODES[class_name] = node_class
+GENERATED_DISPLAY_NAMES[class_name] = display_name
