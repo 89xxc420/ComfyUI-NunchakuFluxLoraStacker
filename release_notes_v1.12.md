@@ -1,4 +1,4 @@
-# v1.12: V2 Nodes - FLUX LoRA Loader V2 and Fast Groups Bypasser V2
+# v1.12: ComfyUI Nodes 2.0 Support - Dynamic LoRA Loader and Fast Groups Bypasser
 
 **Release Date:** December 4, 2025
 
