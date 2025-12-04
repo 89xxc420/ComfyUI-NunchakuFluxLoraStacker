@@ -80,10 +80,10 @@ V1 nodes (`NunchakuFluxLoraStack`) remain available for:
 
 This repository now includes two major V2 nodes with enhanced functionality:
 
-### 1. FLUX LoRA Loader V2 (`FluxLoraMultiLoader_1` ~ `FluxLoraMultiLoader_10`)
+### 1. FLUX LoRA Loader V2 (`FluxLoraMultiLoader_10`)
 
 #### Features
-- **10 Fixed Slot Variants**: Choose from x1 to x10 based on your needs
+- **Single Dynamic Node**: One node with adjustable slot count (1-10)
 - **Combo Box Selector**: Select visible LoRA count (1-10) dynamically via dropdown
 - **Auto Height Adjustment**: Node resizes automatically to fit visible slots
 - **No Validation Errors**: All LoRA inputs are optional; hidden slots don't cause errors
