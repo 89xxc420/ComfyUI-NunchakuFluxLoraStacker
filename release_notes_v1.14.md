@@ -1,5 +1,3 @@
-# v1.14: Node Simplification - V2 Only
-
 **Release Date:** December 4, 2025
 
 ---
