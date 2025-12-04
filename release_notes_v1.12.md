@@ -56,6 +56,8 @@ V1 (`NunchakuFluxLoraStack`) remains for:
 **Purpose:** Documentation update
 
 **Key Changes:**
+- Added repository header clarifying dual functionality (FLUX LoRA Loader V2 + Fast Groups Bypasser V2)
+- Highlighted Fast Groups Bypasser V2 as independent feature (ported from rgthree-comfy)
 - Added V2 nodes section with detailed usage instructions
 - Documented why V2 was necessary (ComfyUI Nodes 2.0 compatibility)
 - Documented why V1 is preserved (backward compatibility)
