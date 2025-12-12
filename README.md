@@ -1,10 +1,11 @@
 # ComfyUI-NunchakuFluxLoraStacker
 
-This repository provides **three independent custom nodes** for ComfyUI:
+This repository provides **four independent custom nodes** for ComfyUI:
 
 1. **FLUX LoRA Loader V2** (`FluxLoraMultiLoader_10`) - Dynamic multi-LoRA loading with combo box UI for Nunchaku FLUX models
 2. **LoRA Stacker V2** (`LoraStackerV2_10`) - Universal LoRA loader for standard SD models (SDXL, Flux, WAN2.2, etc.) with dynamic 10-slot UI
-3. **Fast Groups Bypasser V2** (`FastGroupsBypasserV2`) - Group-based node control utility (ported from [rgthree-comfy](https://github.com/rgthree/rgthree-comfy))
+3. **Model Patch Loader** (`ModelPatchLoaderCustom`) - Load model patches (ControlNet, feature projectors, etc.) with CPU offload support
+4. **Fast Groups Bypasser V2** (`FastGroupsBypasserV2`) - Group-based node control utility (ported from [rgthree-comfy](https://github.com/rgthree/rgthree-comfy))
 
 ---
 
@@ -78,7 +79,7 @@ V1 nodes (`NunchakuFluxLoraStack`) remain available for:
 
 ### V2 Node Overview
 
-This repository now includes two major V2 nodes with enhanced functionality:
+This repository now includes multiple V2 nodes with enhanced functionality:
 
 ### 1. FLUX LoRA Loader V2 (`FluxLoraMultiLoader_10`)
 
@@ -101,7 +102,31 @@ This repository now includes two major V2 nodes with enhanced functionality:
 - `lora_name_X`: LoRA filename (optional)
 - `lora_wt_X`: LoRA strength, default 1.0 (optional)
 
-### 2. Fast Groups Bypasser V2 (`FastGroupsBypasserV2`)
+### 2. Model Patch Loader (`ModelPatchLoaderCustom`)
+
+#### Features
+- **CPU Offload Support**: Optionally load model patches to CPU memory to save VRAM
+- **Multiple Model Types**: Supports QwenImage ControlNet, SigLIP feature projectors, and ZImage ControlNet
+- **Automatic Detection**: Automatically detects and loads the correct model type based on state dict keys
+- **Flexible Deployment**: Choose between CPU (memory) or GPU (VRAM) loading
+
+#### Usage
+1. Place model patch files (`.safetensors` or `.ckpt`) in the `model_patches` folder
+2. Add **Model Patch Loader** node to your workflow
+3. Select the model patch file from the dropdown
+4. Enable `cpu_offload` to load to CPU memory (saves VRAM), or disable for GPU loading
+5. Connect the `MODEL_PATCH` output to compatible nodes
+
+#### Supported Model Types
+- **QwenImageBlockWiseControlNet**: ControlNet for Qwen image generation models
+- **SigLIPMultiFeatProjModel**: Multi-feature projection model for style features
+- **ZImage_Control**: Z-Image format ControlNet
+
+#### Parameters
+- `name`: Model patch filename (required)
+- `cpu_offload`: Load model to CPU memory instead of GPU (default: True)
+
+### 3. Fast Groups Bypasser V2 (`FastGroupsBypasserV2`)
 
 **Note:** This node is a port from the original [rgthree-comfy](https://github.com/rgthree/rgthree-comfy) implementation and is unrelated to LoRA loading functionality. It is included here as a utility feature for workflow management.
 
@@ -121,6 +146,7 @@ This repository now includes two major V2 nodes with enhanced functionality:
 
 ## Release History
 
+- v1.17 – Model Patch Loader: Added ModelPatchLoaderCustom node with CPU offload support for loading ControlNet and feature projector patches
 - v1.16 – LoRA Stacker V2: Added universal LoRA loader for standard SD models (SDXL, Flux, WAN2.2) with dynamic 10-slot UI ([Release Notes](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/releases/tag/v1.16))
 - v1.15 – FastGroupsBypasserV2 Fix: Fixed critical widget update bug where second property change required F5 refresh ([Release Notes](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/releases/tag/v1.15))
 - [v1.14](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/releases/tag/v1.14) – Node Simplification: Removed test nodes (x1-x9), keeping only FLUX LoRA Loader V2 (x10) as the production node
