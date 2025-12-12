@@ -39,6 +39,3 @@ Thumbs.db
 # Logs
 *.log
 
-# Release notes
-release_notes*.md
-
