@@ -1,11 +1,10 @@
 # ComfyUI-NunchakuFluxLoraStacker
 
-This repository provides **four custom nodes** for ComfyUI:
+This repository provides **three independent custom nodes** for ComfyUI:
 
-1. **Nunchaku FLUX LoRA Stack (V1)** (`FluxLoraMultiLoader`) - Legacy node with simple/advanced modes for Nunchaku FLUX models
-2. **FLUX LoRA Loader V2** (`FluxLoraMultiLoader_10`) - Dynamic multi-LoRA loading with combo box UI for Nunchaku FLUX models
-3. **LoRA Stacker V2** (`LoraStackerV2_10`) - Universal LoRA loader for standard SD models (SDXL, Flux, WAN2.2, etc.) with dynamic 10-slot UI
-4. **Fast Groups Bypasser V2** (`FastGroupsBypasserV2`) - Group-based node control utility (ported from [rgthree-comfy](https://github.com/rgthree/rgthree-comfy))
+1. **FLUX LoRA Loader V2** (`FluxLoraMultiLoader_10`) - Dynamic multi-LoRA loading with combo box UI for Nunchaku FLUX models
+2. **LoRA Stacker V2** (`LoraStackerV2_10`) - Universal LoRA loader for standard SD models (SDXL, Flux, WAN2.2, etc.) with dynamic 10-slot UI
+3. **Fast Groups Bypasser V2** (`FastGroupsBypasserV2`) - Group-based node control utility (ported from [rgthree-comfy](https://github.com/rgthree/rgthree-comfy))
 
 ---
 
@@ -81,10 +80,10 @@ V1 nodes (`NunchakuFluxLoraStack`) remain available for:
 
 This repository now includes two major V2 nodes with enhanced functionality:
 
-### 1. FLUX LoRA Loader V2 (`FluxLoraMultiLoader_1` ~ `FluxLoraMultiLoader_10`)
+### 1. FLUX LoRA Loader V2 (`FluxLoraMultiLoader_10`)
 
 #### Features
-- **10 Fixed Slot Variants**: Choose from x1 to x10 based on your needs
+- **Single Dynamic Node**: One node with adjustable slot count (1-10)
 - **Combo Box Selector**: Select visible LoRA count (1-10) dynamically via dropdown
 - **Auto Height Adjustment**: Node resizes automatically to fit visible slots
 - **No Validation Errors**: All LoRA inputs are optional; hidden slots don't cause errors
@@ -133,8 +132,6 @@ This repository now includes two major V2 nodes with enhanced functionality:
 ## License
 
 Apache-2.0
-
-The MIT License (Fast Groups Bypasser V2)
 
 ## Credits
 

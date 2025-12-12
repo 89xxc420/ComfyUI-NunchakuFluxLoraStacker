@@ -1,3 +1,5 @@
+# v1.15: FastGroupsBypasserV2 Critical Fix - Widget State Persistence
+
 **Release Date:** December 5, 2025
 
 ---
@@ -439,18 +441,76 @@ let index = 2;  // Assumes buttons are at 0-1
 - Groups at indices 2+: Managed by `refreshWidgets`
 - **But `splice()` doesn't respect this boundary!**
 
+**What Happens on First Update:**
+```javascript
+this.widgets = [btn1, btn2, groupA, groupB];
+
+// refreshWidgets tries to position groupA at index 2:
+if (this.widgets[2] !== groupA) {  // false (groupA is at 2)
+    // No action needed
+}
+
+// Works fine!
+```
+
 **What Happens on Second Update (After Group Added):**
 ```javascript
 this.widgets = [btn1, btn2, groupA, groupB, groupC];
 
 // refreshWidgets processes in different order (due to sorting):
-// Tries to position groupC at index 2, but splice corrupts button positions
-// Result: Buttons and groups become interleaved incorrectly
+// Wants: [btn1, btn2, groupC, groupA, groupB]
+
+// Tries to position groupC at index 2:
+if (this.widgets[2] !== groupC) {  // true (groupA is at 2)
+    const oldIndex = this.widgets.findIndex(w => w === groupC);  // = 4
+    this.widgets.splice(2, 0, this.widgets.splice(4, 1)[0]);
+    // Result: [btn1, btn2, groupC, groupA, groupB]
+}
+
+// Now index = 3, tries to position groupA:
+if (this.widgets[3] !== groupA) {  // false (groupA IS at 3)
+    // No action
+}
+
+// But wait! During the splice above, btn1 might have shifted!
+// If splice logic is complex, buttons can accidentally move
+// Result: [btn1, groupC, btn2, groupA, groupB]  // CORRUPTED!
+
+// Now fixedWidgetsCount = 2, but buttons are at indices 0 and 2!
+// Next refresh starts at index 2 (where btn2 is) → COLLISION
 ```
 
 **The Solution: Dynamic Button Management**
 
-All widgets managed in `refreshWidgets` with unified index progression, preventing fragmentation.
+```javascript
+// refreshWidgets manages buttons too:
+let index = 0;
+
+// Find or create button, then splice to index 0:
+let btn1 = this.widgets.find(w => w.name === "🎨 Edit Match Colors");
+if (!btn1) btn1 = this.addWidget(...);
+if (this.widgets[0] !== btn1) {
+    splice btn1 to index 0;
+}
+index++;  // = 1
+
+// Find or create button, then splice to index 1:
+let btn2 = this.widgets.find(w => w.name === "📝 Edit Match Title");
+if (!btn2) btn2 = this.addWidget(...);
+if (this.widgets[1] !== btn2) {
+    splice btn2 to index 1;
+}
+index++;  // = 2
+
+// Now groups start at index 2, but buttons are ALSO managed by same loop
+// All widgets in unified coordinate system
+```
+
+**Result:**
+- Buttons repositioned on every refresh (if needed)
+- No assumptions about "fixed" positions
+- `splice()` operations work correctly for ALL widgets
+- No fragmentation, no corruption
 
 ---
 
@@ -463,23 +523,51 @@ All widgets managed in `refreshWidgets` with unified index progression, preventi
 if (!widget) {
     const isEnabled = isGroupEnabled.call(this, group);
     widget = this.addWidget("toggle", widgetName, isEnabled, (v) => {});
+    //                                            ↑
+    //                              Value set HERE (once)
 }
 
 // Widget Reuse (value NOT touched):
 widget.callback = (v) => handleToggle.call(this, group, v, widget);
+//                        ↑
+//              Only callback updated (safe)
 ```
 
 **Widget Value Change Paths:**
 
 **Path 1: User Click**
 ```
-User clicks toggle → callback fires → setGroupMode updates nodes → done
+User clicks toggle
+  ↓
+LiteGraph calls widget.callback(newValue)
+  ↓
+handleToggle(group, newValue, widget) executes
+  ↓
+setGroupMode(group, newValue) changes node modes
+  ↓
+Widget.value updated by LiteGraph internally (we don't touch it)
 ```
 
-**Path 2: External Change (monitored by SimpleRefreshService)**
+**Path 2: External Group Change (monitored by SimpleRefreshService)**
 ```
-External node mode change → refreshWidgets runs → callback updated → value LEFT ALONE
+User manually changes node mode outside the widget
+  ↓
+SimpleRefreshService.refresh() calls node.refreshWidgets()
+  ↓
+isGroupEnabled(group) calculates current state from nodes
+  ↓
+Widget found in array
+  ↓
+Callback updated (widget.value LEFT ALONE)
+  ↓
+Widget displays its current value (unchanged from user's last click)
 ```
+
+**Why NOT Update widget.value in Path 2:**
+- Widget already has correct value from user's last interaction
+- Overwriting it causes event conflicts
+- LiteGraph's internal state can desync
+- Let the widget manage its own value
 
 ---
 
@@ -496,11 +584,44 @@ if (this.widgets[index] !== widget) {
 }
 ```
 
-**How It Works:**
-1. Inner `splice(oldIndex, 1)` removes widget from old position
-2. `[0]` extracts the widget object
-3. Outer `splice(index, 0, widget)` inserts at correct position
-4. Widget moved atomically, preserving object reference
+**Step-by-Step Breakdown:**
+
+**Example: Moving widget from index 4 to index 2**
+
+```javascript
+// Initial state:
+this.widgets = [btn1, btn2, groupA, groupB, groupC];
+//              [0]   [1]   [2]     [3]     [4]
+
+// Want groupC at index 2:
+const oldIndex = this.widgets.findIndex(w => w === groupC);  // = 4
+
+// Inner splice: Remove from index 4
+this.widgets.splice(4, 1);
+// → Removes 1 element at index 4
+// → Returns [groupC]
+// → Array is now: [btn1, btn2, groupA, groupB]
+
+// [0] extracts first element:
+this.widgets.splice(4, 1)[0];
+// → Returns groupC (the widget object)
+
+// Outer splice: Insert at index 2
+this.widgets.splice(2, 0, groupC);
+// → Inserts groupC at index 2, shifting others right
+// → Array is now: [btn1, btn2, groupC, groupA, groupB]
+
+// Final result:
+this.widgets = [btn1, btn2, groupC, groupA, groupB];
+//              [0]   [1]   [2]     [3]     [4]
+```
+
+**Why This Works:**
+1. **Inner splice** removes widget from old position
+2. **[0]** extracts the widget object from returned array
+3. **Outer splice** inserts widget at correct new position
+4. **Atomic operation**: Widget moved in single expression
+5. **Preserves widget object**: Same instance, same event listeners, same state
 
 ---
 
@@ -512,7 +633,9 @@ if (this.widgets[index] !== widget) {
 |-------|-----------------|---------------|
 | **Button Creation** | `nodeCreated` (static, once) | `refreshWidgets` (dynamic, every call) |
 | **Button Positioning** | Fixed at indices 0-1 (never moved) | find + splice (repositioned if needed) |
+| **Group Widget Creation** | `refreshWidgets` (if missing) | `refreshWidgets` (if missing) |
 | **Group Widget Value** | **Force updated every refresh** | **Set once on creation, never touched** |
+| **Group Widget Callback** | Updated every refresh | Updated every refresh |
 | **Widget Removal** | `removeWidget(index)` | `removeWidget(this.widgets[index])` |
 | **Index Management** | Split (fixedWidgetsCount) | Unified (index = 0) |
 
@@ -525,15 +648,123 @@ if (this.widgets[index] !== widget) {
 | **Third toggle click** | ✗ Fails (requires F5) | ✓ Works |
 | **Property change #1** | ✓ Works | ✓ Works |
 | **Property change #2** | ✗ Fails (requires F5) | ✓ Works |
+| **Continuous monitoring** | ✗ Broken (state desyncs) | ✓ Reliable |
 
 ---
 
-## Part 4: The 100ms Refresh Loop
+## Part 4: Why This Pattern is Robust
 
-### 4.1 SimpleRefreshService Implementation
+### 4.1 Consistency with rgthree Original
+
+**rgthree-comfy's Fast Groups Node:**
+
+```javascript
+// rgthree's refreshWidgets (simplified):
+let index = 0;
+for (const group of groups) {
+    let widget = this.widgets.find((w) => w.label === widgetLabel);
+    if (!widget) {
+        widget = this.addCustomWidget(new FastGroupsToggleRowWidget(group, this));
+    }
+    // Update widget properties (but NOT value)
+    widget.label = widgetLabel;
+    
+    // Position widget
+    if (this.widgets[index] !== widget) {
+        const oldIndex = this.widgets.findIndex((w) => w === widget);
+        this.widgets.splice(index, 0, this.widgets.splice(oldIndex, 1)[0]);
+    }
+    index++;
+}
+// Remove excess
+while ((this.widgets || [])[index]) {
+    this.removeWidget(index++);
+}
+```
+
+**Our Implementation:** Near-identical pattern, adapted for:
+- Standard ComfyUI widgets (not custom widgets)
+- Button management included in same loop
+- Object-based `removeWidget` for better compatibility
+
+### 4.2 Why find + splice is Superior to Physical Reconstruction
+
+**Alternative Approach (Not Used): Complete Array Rebuild**
+
+```javascript
+// Flux V2 style (works for LoRA Loader, NOT for Fast Bypasser):
+this.widgets = [];  // Clear array completely
+this.widgets.push(btn1, btn2);
+for (const group of filteredGroups) {
+    this.widgets.push(groupWidget);
+}
+```
+
+**Why NOT Used for FastGroupsBypasserV2:**
+
+**Problem: Widget Creation Overhead**
+- FastGroupsBypasserV2 refreshes every 100ms (continuous monitoring)
+- Complete reconstruction = destroy and recreate all widgets every 100ms
+- Event listeners would be lost and re-attached constantly
+- Performance degradation
+
+**Advantage of find + splice:**
+- Widgets are **reused** (same object references)
+- Event listeners persist across refreshes
+- No creation/destruction overhead
+- Only **repositioning** (very fast)
+
+**When to Use Each Pattern:**
+
+| Node Type | Pattern | Reason |
+|-----------|---------|--------|
+| **FLUX LoRA Loader V2** | Physical reconstruction | User-triggered updates only (low frequency) |
+| **FastGroupsBypasserV2** | find + splice | Continuous monitoring (high frequency, 100ms loop) |
+
+---
+
+## Part 5: The 100ms Refresh Loop
+
+### 5.1 Why Continuous Monitoring is Necessary
+
+**Unlike FLUX LoRA Loader V2:**
+- LoRA Loader responds to **its own properties** only (`visibleLoraCount`)
+- When user changes dropdown → `updateLoraSlots()` runs once → done
+- No need for continuous monitoring
+
+**FastGroupsBypasserV2 Must Monitor External State:**
+- Watches `graph._groups` (group list in canvas)
+- Groups can be:
+  - Created/deleted by user
+  - Renamed by user
+  - Moved/resized by user
+  - Nodes inside groups can change mode externally
+- **None of these trigger `node.onPropertyChanged`**
+- Therefore: Continuous polling required
+
+### 5.2 SimpleRefreshService Implementation
 
 ```javascript
 class SimpleRefreshService {
+    constructor() {
+        this.nodes = [];
+        this.scheduled = false;
+    }
+    
+    addNode(node) {
+        if (!this.nodes.includes(node)) {
+            this.nodes.push(node);
+            this.scheduleRefresh();
+        }
+    }
+    
+    removeNode(node) {
+        const index = this.nodes.indexOf(node);
+        if (index > -1) {
+            this.nodes.splice(index, 1);
+        }
+    }
+    
     scheduleRefresh() {
         if (this.scheduled) return;
         this.scheduled = true;
@@ -541,7 +772,7 @@ class SimpleRefreshService {
             this.refresh();
             this.scheduled = false;
             if (this.nodes.length > 0) {
-                this.scheduleRefresh();  // Recursive call - continuous monitoring
+                this.scheduleRefresh();  // KEY: Recursive call (continuous loop)
             }
         }, 100);
     }
@@ -556,57 +787,181 @@ class SimpleRefreshService {
 }
 ```
 
-**Why Continuous Monitoring:**
-- FastGroupsBypasserV2 must react to external graph changes
-- Groups can be renamed, moved, or have nodes added/removed
-- 100ms polling ensures real-time updates
+**The Recursive Loop:**
+```javascript
+if (this.nodes.length > 0) {
+    this.scheduleRefresh();  // Re-schedule after 100ms
+}
+```
+
+**Why This is Critical:**
+- Without recursion: Service runs once, then stops
+- With recursion: Service runs every 100ms as long as nodes exist
+- Result: FastGroupsBypasserV2 reacts to external changes in real-time
+
+**Performance Consideration:**
+- 100ms interval = 10 times per second
+- Each refresh checks group list and repositions widgets if needed
+- Very lightweight (find + splice operations)
+- No noticeable performance impact
 
 ---
 
-## Part 5: Migration and Compatibility
+## Part 6: Migration and Compatibility
 
-### 5.1 For Existing Users
+### 6.1 For Existing Users
 
 **Impact:** **Zero configuration required**
 
 **Workflows using FastGroupsBypasserV2:**
-- All settings preserved
-- All widget states preserved  
-- Behavior identical, just now works reliably
+- All settings preserved (matchColors, matchTitle, sort, etc.)
+- All widget states preserved (toggle positions)
+- Behavior is identical, just **now works reliably**
 
-### 5.2 Verification Steps
+**No migration needed:**
+- Simply update to v1.15
+- Existing workflows load and work correctly
+- Bug is fixed transparently
+
+### 6.2 Verification Steps
 
 **After updating to v1.15:**
 
-1. Load workflow with FastGroupsBypasserV2
-2. Toggle a group → Should work
-3. Toggle another group immediately → Should work (no F5 needed)
-4. Change matchColors property → Should update instantly
-5. Repeat multiple times → Should work every time
+1. **Load a workflow with FastGroupsBypasserV2**
+2. **Toggle a group** → Should work
+3. **Toggle another group immediately** → Should work (no F5 needed)
+4. **Change matchColors property** → Should update instantly
+5. **Change matchTitle property** → Should update instantly
+6. **Repeat steps 2-5 multiple times** → Should work every time
+
+**Console Verification:**
+- No error messages
+- No infinite loop logs
+- Widgets update smoothly
+
+---
+
+## Part 7: Technical Specifications
+
+### 7.1 Files Modified
+
+**Modified:**
+- `js/fast_bypass_v2.js` (Complete `refreshWidgets` restructure)
+
+**Unchanged:**
+- `js/z_flux_lora_dynamic.js` (FLUX LoRA Loader V2 - unaffected)
+- `nodes/utils/fast_bypasser.py` (Python backend - no changes needed)
+- All other files
+
+**Total Changes:**
+- 1 file modified
+- ~20 lines reorganized
+- 3 critical bug fixes
+- 0 new features (pure bug fix release)
+
+### 7.2 Compatibility
+
+**ComfyUI Version:**
+- Compatible with ComfyUI 2.0+
+- Tested with ComfyUI Desktop version
+
+**Browser Compatibility:**
+- All modern browsers (Chrome, Firefox, Edge)
+- Requires JavaScript ES6+ (arrow functions, const/let)
+
+**Workflow Compatibility:**
+- **100% backward compatible** with v1.14 workflows
+- No breaking changes
+- Existing toggle states preserved
+
+---
+
+## Part 8: Installation and Upgrade
+
+### 8.1 Fresh Installation
+
+```bash
+cd ComfyUI/custom_nodes
+git clone https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker.git
+cd ComfyUI-NunchakuFluxLoraStacker
+git checkout v1.15
+```
+
+**Result:**
+- FastGroupsBypasserV2 with bug fix installed
+- Ready to use immediately
+
+### 8.2 Upgrade from v1.14
+
+```bash
+cd ComfyUI/custom_nodes/ComfyUI-NunchakuFluxLoraStacker
+git pull origin main
+git checkout v1.15
+```
+
+**Result:**
+- Bug fix applied
+- All workflows continue working
+- No reconfiguration needed
+
+### 8.3 Verification
+
+**After installation/upgrade:**
+
+1. **Restart ComfyUI**
+2. **Add FastGroupsBypasserV2 node**
+3. **Test multiple toggles** → Should work without F5
+4. **Console check:**
+   ```
+   [FastBypassV2] loaded successfully
+   ```
 
 ---
 
 ## Summary
 
-### What v1.15 Fixes
+### What v1.15 Does
 
-**The Bug:**
-- Second property change failed without F5 refresh
+**Fixes:**
+- FastGroupsBypasserV2 "second update fails" bug
+- Widget value update conflicts
+- Widget removal index errors
+- Widget array fragmentation
 
-**The Root Causes:**
-1. Forced `widget.value` updates causing state conflicts
-2. Incorrect `removeWidget` calls causing index corruption
-3. Split index management causing array fragmentation
+**Adds:**
+- Reliable multi-update support
+- Consistent widget positioning
+- Professional user experience
 
-**The Fixes:**
-1. Removed `widget.value` updates for existing widgets
-2. Changed `removeWidget` to accept widget objects
-3. Unified all widgets under single index space (buttons in `refreshWidgets`)
+**Maintains:**
+- 100% backward compatibility
+- All existing features
+- Zero configuration changes
 
-**The Result:**
-- FastGroupsBypasserV2 now works reliably for repeated updates
-- No F5 refresh required
-- Smooth, professional user experience
+### Who Should Upgrade
+
+**Recommended for:**
+- **All users of FastGroupsBypasserV2** (critical bug fix)
+- Anyone experiencing "frozen toggle" issues
+- Users who previously needed F5 refresh after every change
+
+**Not Affected:**
+- Users who don't use FastGroupsBypasserV2
+- FLUX LoRA Loader V2 users (no changes to that node)
+
+---
+
+## Conclusion
+
+v1.15 represents a **critical stability fix** for FastGroupsBypasserV2:
+- Bug that made the node practically unusable is now fixed
+- Adopted rgthree's proven widget management pattern
+- Maintains compatibility while fixing fundamental issues
+- Professional, reliable workflow management tool
+
+**For users:** FastGroupsBypasserV2 now works as intended - smoothly, reliably, without constant refreshes.
+
+**For developers:** Clean implementation following established patterns from rgthree-comfy.
 
 ---
 

@@ -4,7 +4,7 @@ console.log("★★★ z_flux_lora_dynamic.js: FORCE TYPE RESTORE & MANUAL HEIGH
 
 const HIDDEN_TAG = "tschide";
 
-// Hardcode correct types to restore (don't rely on origProps)
+// 復元すべき正しい型をハードコード定義（origPropsに頼らない）
 const WIDGET_TYPES = {
     "lora_name": "combo",
     "lora_wt": "number"
@@ -22,7 +22,7 @@ app.registerExtension({
     nodeCreated(node) {
         if (node.comfyClass !== "FluxLoraMultiLoader_10") return;
 
-        // Eliminate root cause of state save issues
+        // 状態保存トラブルの元凶を断つ
         node.serialize_widgets = false;
 
         if (!node.properties) node.properties = {};
@@ -31,40 +31,40 @@ app.registerExtension({
         node.updateLoraSlots = function() {
             const count = parseInt(this.properties["visibleLoraCount"] || 1);
             
-            // 1. Force widget visibility/hidden state
-            // Scan all 1-10, set to "normal type" if <= count, otherwise "HIDDEN"
+            // 1. ウィジェットの表示/非表示を強制設定
+            // 1～10まで全て走査し、count以下なら「正規の型」に、それ以外なら「HIDDEN」にする
             for (let i = 1; i <= 10; i++) {
                 const isVisible = i <= count;
                 
-                // Name (combo) and Weight (number)
+                // 名前 (combo) と 重み (number)
                 ["lora_name", "lora_wt"].forEach(prefix => {
                     const wName = `${prefix}_${i}`;
                     const w = this.widgets.find(x => x.name === wName);
                     if (w) {
                         if (isVisible) {
-                            // ★Important: Don't look at origProps, always overwrite with correct type
-                            // This prevents accidents where "previously hidden returns to HIDDEN"
+                            // ★重要: origPropsは見ず、必ず正しい型で上書きする
+                            // これにより「以前隠れていたからHIDDENに戻る」事故を防ぐ
                             w.type = WIDGET_TYPES[prefix];
                             
-                            // Revert computeSize to default (default is used if not specified)
-                            // Remove computeSize override from previous changes
+                            // computeSizeも標準に戻す（特に指定しなければデフォルトが使われる）
+                            // 前回の変更でcomputeSizeを上書きしていた場合の解除
                             if (w.computeSize && w.computeSize.toString().includes("return [0, -4]")) {
                                 delete w.computeSize; 
                             }
                         } else {
                             w.type = HIDDEN_TAG;
-                            // Collapse height
+                            // 高さを潰す
                             w.computeSize = () => [0, -4];
                         }
                     }
                 });
             }
 
-            // 2. Manual node height calculation
-            // Header + Button + (Slot count * Height)
-            // LiteGraph standard heights: Header~30, Button~30, Each widget~26
-            // Per slot: Name(26) + Weight(26) + Margin = ~54px
-            const HEADER_H = 60; // Includes button
+            // 2. ノードの高さ手動計算
+            // ヘッダー + ボタン + (スロット数 * 高さ)
+            // LiteGraphの標準的な高さ: ヘッダー~30, ボタン~30, 各ウィジェット~26
+            // スロットあたり: 名前(26) + 重み(26) + マージン = 約54px
+            const HEADER_H = 60; // ボタン含む
             const SLOT_H = 54; 
             const PADDING = 20;
             
@@ -75,9 +75,9 @@ app.registerExtension({
             if (app.canvas) app.canvas.setDirty(true, true);
         };
 
-        // Add button
+        // ボタン追加
         const btnName = "🔢 Set LoRA Count";
-        // Prevent duplicates
+        // 重複防止
         let btn = node.widgets.find(w => w.name === btnName);
         if (!btn) {
             btn = node.addWidget("button", btnName, null, () => {
@@ -93,13 +93,13 @@ app.registerExtension({
             });
         }
         
-        // Move button to front (always)
+        // ボタンを先頭へ移動（常に）
         const btnIdx = node.widgets.indexOf(btn);
         if (btnIdx > 0) {
             node.widgets.splice(0, 0, node.widgets.splice(btnIdx, 1)[0]);
         }
         
-        // Reset callback (reload countermeasure)
+        // コールバック再設定（再読み込み対策）
         btn.callback = () => {
             const current = node.properties["visibleLoraCount"];
             const val = prompt("Enter LoRA Count (1-10):", current);
@@ -118,7 +118,7 @@ app.registerExtension({
             }
         };
 
-        // Initial execution
+        // 初回実行
         setTimeout(() => node.updateLoraSlots(), 100);
     }
 });

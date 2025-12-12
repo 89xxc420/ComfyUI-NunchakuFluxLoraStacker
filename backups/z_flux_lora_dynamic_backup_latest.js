@@ -41,7 +41,7 @@ app.registerExtension({
         const ensureControlWidget = () => {
             const name = "🔢 LoRA Count";
             
-            // Remove all button widgets completely
+            // ボタン徹底削除
             for (let i = node.widgets.length - 1; i >= 0; i--) {
                 const w = node.widgets[i];
                 if (w.name === "🔢 Set LoRA Count" || w.type === "button") {
@@ -70,7 +70,7 @@ app.registerExtension({
             const count = parseInt(this.properties["visibleLoraCount"] || 1);
             const controlWidget = ensureControlWidget();
 
-            // Physical deletion (perfect visual logic)
+            // 物理削除（見た目完璧ロジック）
             this.widgets = [controlWidget];
 
             for (let i = 1; i <= count; i++) {
@@ -81,7 +81,7 @@ app.registerExtension({
                 }
             }
 
-            // Height calculation
+            // 高さ計算
             const HEADER_H = 60;
             const SLOT_H = 54;
             const PADDING = 20;
@@ -100,7 +100,7 @@ app.registerExtension({
             }
         };
         
-        // Restore on load
+        // ロード時復元
         const origOnConfigure = node.onConfigure;
         node.onConfigure = function() {
              if (origOnConfigure) origOnConfigure.apply(this, arguments);

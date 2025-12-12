@@ -109,4 +109,3 @@ node_class = type(class_name, (StandardLoraLoaderBase,), {
 
 GENERATED_NODES[class_name] = node_class
 GENERATED_DISPLAY_NAMES[class_name] = display_name
-
