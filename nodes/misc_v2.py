@@ -264,8 +264,45 @@ class ModelPatchLoaderCustom:
         elif 'control_all_x_embedder.2-1.weight' in sd: # alipai z image fun controlnet
             sd = z_image_convert(sd)
             model = comfy.ldm.lumina.controlnet.ZImage_Control(device=model_device, dtype=dtype, operations=comfy.ops.manual_cast)
+            
+            # Support latest Z-Image Control model: filter out size mismatches and missing keys
+            model_state_dict = model.state_dict()
+            filtered_sd = {}
+            missing_keys = []
+            size_mismatch_keys = []
+            
+            for k, v in sd.items():
+                if k in model_state_dict:
+                    # Only add if shapes match
+                    if v.shape == model_state_dict[k].shape:
+                        filtered_sd[k] = v
+                    else:
+                        size_mismatch_keys.append(f"{k}: checkpoint shape {v.shape} vs model shape {model_state_dict[k].shape}")
+                else:
+                    missing_keys.append(k)
+            
+            # Print warning messages for missing keys and size mismatches
+            if missing_keys:
+                print(f"[ModelPatchLoaderCustom] Warning: {len(missing_keys)} keys not found in model (excluded to match latest model structure)")
+                if len(missing_keys) <= 10:
+                    for key in missing_keys[:10]:
+                        print(f"  - {key}")
+                else:
+                    for key in missing_keys[:5]:
+                        print(f"  - {key}")
+                    print(f"  ... and {len(missing_keys) - 5} more")
+            
+            if size_mismatch_keys:
+                print(f"[ModelPatchLoaderCustom] Warning: {len(size_mismatch_keys)} keys have size mismatches (excluded to match latest model structure)")
+                for key_info in size_mismatch_keys[:5]:
+                    print(f"  - {key_info}")
+                if len(size_mismatch_keys) > 5:
+                    print(f"  ... and {len(size_mismatch_keys) - 5} more")
+            
+            sd = filtered_sd
 
-        model.load_state_dict(sd)
+        # Load with strict=False (only load matching keys)
+        model.load_state_dict(sd, strict=False)
         # load_deviceとoffload_deviceを設定
         model = comfy.model_patcher.ModelPatcher(model, load_device=load_device, offload_device=offload_device)
         return (model,)
