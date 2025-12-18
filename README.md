@@ -147,6 +147,7 @@ This repository now includes multiple V2 nodes with enhanced functionality:
 
 ## Release History
 
+- v1.20 – Node Name Update: Updated display name to reflect multi-purpose nature of the repository. The repository now includes multiple independent nodes (FLUX LoRA Loader V2, LoRA Stacker V2, SDNQ LoRA Stacker V2, Model Patch Loader, Fast Groups Bypasser V2), not just FLUX LoRA stacking functionality
 - v1.18 – SDNQ LoRA Stacker V2: Added dedicated SDNQ LoRA Stacker V2 node for SDNQ quantized models with dynamic 10-slot UI (for use with [comfyui-sdnq-splited](https://github.com/ussoewwin/comfyui-sdnq-splited)). Fixed Z-Image ControlNet loading to support Union 2.0 checkpoints with filtering for size mismatches
 - v1.17 – Model Patch Loader: Added ModelPatchLoaderCustom node with CPU offload support for loading ControlNet and feature projector patches
 - v1.16 – LoRA Stacker V2: Added universal LoRA loader for standard SD models (SDXL, Flux, WAN2.2) with dynamic 10-slot UI ([Release Notes](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/releases/tag/v1.16))
