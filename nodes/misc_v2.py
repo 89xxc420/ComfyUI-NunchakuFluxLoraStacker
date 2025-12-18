@@ -230,7 +230,7 @@ class ModelPatchLoaderCustom:
     def INPUT_TYPES(s):
         return {"required": { 
             "name": (folder_paths.get_filename_list("model_patches"), ),
-            "cpu_offload": ("BOOLEAN", {"default": True, "tooltip": "モデルをCPU（メインメモリ）にロードします。VRAMを使用しません。"}),
+            "cpu_offload": ("BOOLEAN", {"default": True, "tooltip": "Load model to CPU (main memory). Does not use VRAM."}),
                               }}
     RETURN_TYPES = ("MODEL_PATCH",)
     FUNCTION = "load_model_patch"
@@ -243,14 +243,14 @@ class ModelPatchLoaderCustom:
         sd = comfy.utils.load_torch_file(model_patch_path, safe_load=True)
         dtype = comfy.utils.weight_dtype(sd)
 
-        # CPUオフロードの設定に応じてデバイスを選択
+        # Select device based on CPU offload setting
         if cpu_offload:
-            # CPUオフロード: 全てのモデルをCPU（メインメモリ）にロード
+            # CPU offload: Load all models to CPU (main memory)
             load_device = torch.device("cpu")
             offload_device = torch.device("cpu")
             model_device = torch.device("cpu")
         else:
-            # 通常モード: GPUを使用
+            # Normal mode: Use GPU
             load_device = comfy.model_management.get_torch_device()
             offload_device = comfy.model_management.unet_offload_device()
             model_device = comfy.model_management.unet_offload_device()
@@ -303,7 +303,7 @@ class ModelPatchLoaderCustom:
 
         # Load with strict=False (only load matching keys)
         model.load_state_dict(sd, strict=False)
-        # load_deviceとoffload_deviceを設定
+        # Set load_device and offload_device
         model = comfy.model_patcher.ModelPatcher(model, load_device=load_device, offload_device=offload_device)
         return (model,)
 
