@@ -3,10 +3,24 @@
 This repository provides **five independent custom nodes** for ComfyUI:
 
 1. **FLUX LoRA Loader V2** (`FluxLoraMultiLoader_10`) - Dynamic multi-LoRA loading with combo box UI for Nunchaku FLUX models
+    
+    <img src="png/FLUX%20LoRA%20Loader%20V2.png" width="400">
+
 2. **LoRA Stacker V2** (`LoraStackerV2_10`) - Universal LoRA loader for standard SD models (SDXL, Flux, WAN2.2, etc.) with dynamic 10-slot UI
+    
+    <img src="png/LoRA%20Stacker%20V2.png" width="400">
+
 3. **SDNQ LoRA Stacker V2** (`SDNQLoraStackerV2_10`) - Dedicated LoRA loader for SDNQ quantized models with dynamic 10-slot UI (designed for use with [comfyui-sdnq-splited](https://github.com/ussoewwin/comfyui-sdnq-splited))
+    
+    <img src="png/SDNQ%20LoRA%20Stacker%20V2.png" width="400">
+
 4. **Model Patch Loader** (`ModelPatchLoaderCustom`) - Load model patches (ControlNet, feature projectors, etc.) with CPU offload support
+    
+    <img src="png/Model%20Patch%20Loader.png" width="400">
+
 5. **Fast Groups Bypasser V2** (`FastGroupsBypasserV2`) - Group-based node control utility (ported from [rgthree-comfy](https://github.com/rgthree/rgthree-comfy))
+    
+    <img src="png/Fast%20Groups%20Bypasser%20V2.png" width="400">
 
 ---
 
