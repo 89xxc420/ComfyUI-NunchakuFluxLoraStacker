@@ -263,7 +263,28 @@ class ModelPatchLoaderCustom:
             model = SigLIPMultiFeatProjModel(device=model_device, dtype=dtype, operations=comfy.ops.manual_cast)
         elif 'control_all_x_embedder.2-1.weight' in sd: # alipai z image fun controlnet
             sd = z_image_convert(sd)
-            model = comfy.ldm.lumina.controlnet.ZImage_Control(device=model_device, dtype=dtype, operations=comfy.ops.manual_cast)
+            config = {}
+            # Check for 2.0 or 2.1 by counting control_layers
+            n_control_layers = 0
+            for k in sd.keys():
+                if k.startswith('control_layers.') and '.adaLN_modulation.0.weight' in k:
+                    layer_idx = int(k.split('.')[1])
+                    n_control_layers = max(n_control_layers, layer_idx + 1)
+            
+            # Fallback to 2.0 detection if dynamic count fails
+            if n_control_layers == 0 and 'control_layers.14.adaLN_modulation.0.weight' in sd:
+                n_control_layers = 15
+            
+            if n_control_layers > 0:
+                config['n_control_layers'] = n_control_layers
+                config['additional_in_dim'] = 17
+                config['refiner_control'] = True
+                ref_weight = sd.get("control_noise_refiner.0.after_proj.weight", None)
+                if ref_weight is not None:
+                    if torch.count_nonzero(ref_weight) == 0:
+                        config['broken'] = True
+            
+            model = comfy.ldm.lumina.controlnet.ZImage_Control(device=model_device, dtype=dtype, operations=comfy.ops.manual_cast, **config)
             
             # Support latest Z-Image Control model: filter out size mismatches and missing keys
             model_state_dict = model.state_dict()
