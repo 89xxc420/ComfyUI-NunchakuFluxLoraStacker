@@ -1,6 +1,6 @@
 [project]
 name = "ComfyUI-NunchakuFluxLoraStacker"
-version = "1.20"
+version = "1.21"
 description = "ComfyUI custom nodes: FLUX LoRA Loader V2 (Nunchaku FLUX), LoRA Stacker V2 (SDXL/SD1.5/WAN2.2), SDNQ LoRA Stacker V2 (SDNQ quantized models), Model Patch Loader (ControlNet/feature projectors), Fast Groups Bypasser V2 (group control utility). All with dynamic 10-slot UI."
 authors = [{ name = "ussoewwin" }]
 license = { file = "LICENSE" }
