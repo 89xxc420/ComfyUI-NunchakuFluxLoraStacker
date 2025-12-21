@@ -119,6 +119,8 @@ This repository now includes multiple V2 nodes with enhanced functionality:
 
 ### 2. Model Patch Loader (`ModelPatchLoaderCustom`)
 
+    <img src="png/Model%20Patch%20Loader.png" width="400">
+
 #### Features
 - **CPU Offload Support**: Optionally load model patches to CPU memory to save VRAM
 - **Multiple Model Types**: Supports QwenImage ControlNet, SigLIP feature projectors, and ZImage ControlNet
@@ -142,6 +144,8 @@ This repository now includes multiple V2 nodes with enhanced functionality:
 - `cpu_offload`: Load model to CPU memory instead of GPU (default: True)
 
 ### 3. Fast Groups Bypasser V2 (`FastGroupsBypasserV2`)
+
+    <img src="png/Fast%20Groups%20Bypasser%20V2.png" width="400">
 
 **Note:** This node is a port from the original [rgthree-comfy](https://github.com/rgthree/rgthree-comfy) implementation and is unrelated to LoRA loading functionality. It is included here as a utility feature for workflow management.
 
