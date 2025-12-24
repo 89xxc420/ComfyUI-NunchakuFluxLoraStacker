@@ -10,20 +10,26 @@ backups/z_flux_lora_dynamic_backup_combo_working.js
 backups/z_flux_lora_dynamic_backup_final_ok.js
 backups/z_flux_lora_dynamic_backup_latest.js
 backups/z_flux_lora_dynamic_backup_slots_ok.js
+h origin v1.14 -f
 js/fast_bypass_v2.js
 js/lora_stacker_v2.js
+js/sdnq.js
 js/widgethider.js
 js/z_flux_lora_dynamic.js
 nodes/__init__.py
 nodes/lora/__init__.py
 nodes/lora/flux.py
 nodes/lora/flux_v2.py
+nodes/lora/sdnq.py
 nodes/lora/standard.py
 nodes/misc_v2.py
+png/FLUX LoRA Loader V2.png
+png/Fast Groups Bypasser V2.png
+png/LoRA Stacker V2.png
+png/Model Patch Loader.png
+png/SDNQ LoRA Stacker V2.png
 pyproject.toml
-release_notes_v1.14.md
-release_notes_v1.15.md
-release_notes_v1.16.md
+remote_readme.md
 requirements.txt
 wrappers/__init__.py
 wrappers/flux.py

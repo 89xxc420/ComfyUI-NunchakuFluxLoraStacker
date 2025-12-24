@@ -19,6 +19,7 @@ from .nodes.lora.flux_v2 import GENERATED_NODES as FLUX_NODES, GENERATED_DISPLAY
 from .nodes.lora.standard import GENERATED_NODES as STANDARD_LORA_NODES, GENERATED_DISPLAY_NAMES as STANDARD_LORA_NAMES
 from .nodes.lora.sdnq import GENERATED_NODES as SDNQ_LORA_NODES, GENERATED_DISPLAY_NAMES as SDNQ_LORA_NAMES
 from .nodes.misc_v2 import NODE_CLASS_MAPPINGS as MISC_NODES, NODE_DISPLAY_NAME_MAPPINGS as MISC_NAMES
+from .AILab_SAM3Segment import NODE_CLASS_MAPPINGS as SAM3_NODES, NODE_DISPLAY_NAME_MAPPINGS as SAM3_NAMES
 
 # Add version to classes
 NunchakuFluxLoraStack.__version__ = __version__
@@ -35,7 +36,8 @@ NODE_CLASS_MAPPINGS = {
     **FLUX_NODES,
     **STANDARD_LORA_NODES,
     **SDNQ_LORA_NODES,
-    **MISC_NODES
+    **MISC_NODES,
+    **SAM3_NODES
 }
 
 # Display name mappings
@@ -44,11 +46,13 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     **FLUX_NAMES,
     **STANDARD_LORA_NAMES,
     **SDNQ_LORA_NAMES,
-    **MISC_NAMES
+    **MISC_NAMES,
+    **SAM3_NAMES
 }
 
-# Register JavaScript extensions (Only for Legacy node)
-WEB_DIRECTORY = "js"
+# Register JavaScript extensions
+# Serve JS from ./js so colorWidget.js (moved) is loaded
+WEB_DIRECTORY = "./js"
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "__version__"]
 
