@@ -176,11 +176,12 @@ This repository now includes multiple V2 nodes with enhanced functionality:
 - v1.11 – Corrected the README clone command to use the canonical repository URL. ([Issue #3](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/issues/3))
 - [v1.10](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/releases/tag/v1.10) – LoRA Loader Fix - Complete Version
 
-## License
-
-Apache-2.0
-
 ## Credits
 
 - Dynamic UI implementation based on [efficiency-nodes-comfyui](https://github.com/jags111/efficiency-nodes-comfyui)
 - Fast Groups Bypasser V2 ported from [rgthree-comfy](https://github.com/rgthree/rgthree-comfy)
+
+## License
+
+- This repository is licensed under Apache-2.0
+- Fast Groups Bypasser V2 is ported from [rgthree-comfy](https://github.com/rgthree/rgthree-comfy) and is licensed under MIT License
