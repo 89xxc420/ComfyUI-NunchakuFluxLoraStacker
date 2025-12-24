@@ -1,0 +1,283 @@
+[33mcommit 67cc87168e0942b8efef5208402b881612a3da3f[m[33m ([m[1;33mtag: [m[1;33mv1.14[m[33m)[m
+Author: Your Name <your@email.com>
+Date:   Thu Dec 4 21:54:00 2025 +0900
+
+    Remove all release notes markdown files
+
+[1mdiff --git a/release_notes_v1.13.md b/release_notes_v1.13.md[m
+[1mdeleted file mode 100644[m
+[1mindex 9a06539..0000000[m
+[1m--- a/release_notes_v1.13.md[m
+[1m+++ /dev/null[m
+[36m@@ -1,271 +0,0 @@[m
+[31m-**Release Date:** December 4, 2025[m
+[31m-[m
+[31m-**Major Changes:**[m
+[31m-- Removed all backup JavaScript files from repository[m
+[31m-- Clean source code distribution without development artifacts[m
+[31m-- Updated version to 1.13[m
+[31m-[m
+[31m----[m
+[31m-[m
+[31m-## 1. Purpose of This Release[m
+[31m-[m
+[31m-### Problem: Backup Files in Source Downloads[m
+[31m-[m
+[31m-**Issue:**[m
+[31m-Previous releases (v1.12 and earlier) included backup JavaScript files in the `js/` directory:[m
+[31m-- `z_flux_lora_dynamic_backup_final_ok.js`[m
+[31m-- `z_flux_lora_dynamic_backup_latest.js`[m
+[31m-- `z_flux_lora_dynamic_backup_slots_ok.js`[m
+[31m-- `z_flux_lora_dynamic_backup_combo_working.js`[m
+[31m-- `z_flux_lora_dynamic_FINAL_WORKING_COMBO.js`[m
+[31m-[m
+[31m-**Impact:**[m
+[31m-- ComfyUI loads **all** JavaScript files from `custom_nodes/*/js/` directories[m
+[31m-- Multiple versions of the same extension would load simultaneously[m
+[31m-- This caused conflicts, unexpected behavior, and confusion[m
+[31m-- Users downloading source code would get these backup files[m
+[31m-[m
+[31m-### Solution: Complete Removal[m
+[31m-[m
+[31m-**v1.13 Changes:**[m
+[31m-1. Removed all backup files from `js/` directory[m
+[31m-2. Moved backups to `backups/` directory (not tracked by git)[m
+[31m-3. Updated git tracking to exclude backup files[m
+[31m-4. Ensured clean source code in releases[m
+[31m-[m
+[31m----[m
+[31m-[m
+[31m-## 2. Files Removed from Git Tracking[m
+[31m-[m
+[31m-The following files were removed from the repository:[m
+[31m-[m
+[31m-```[m
+[31m-js/z_flux_lora_dynamic_FINAL_WORKING_COMBO.js        (116 lines)[m
+[31m-js/z_flux_lora_dynamic_backup_combo_working.js       (115 lines)[m
+[31m-js/z_flux_lora_dynamic_backup_final_ok.js            (116 lines)[m
+[31m-js/z_flux_lora_dynamic_backup_latest.js              (116 lines)[m
+[31m-js/z_flux_lora_dynamic_backup_slots_ok.js            (123 lines)[m
+[31m-```[m
+[31m-[m
+[31m-**Total:** 586 lines of redundant code removed[m
+[31m-[m
+[31m----[m
+[31m-[m
+[31m-## 3. Current File Structure[m
+[31m-[m
+[31m-### JavaScript Files (`js/` directory)[m
+[31m-[m
+[31m-**Production Files (3 files):**[m
+[31m-1. `z_flux_lora_dynamic.js` - FLUX LoRA Loader V2 dynamic UI controller[m
+[31m-2. `fast_bypass_v2.js` - Fast Groups Bypasser V2 (ported from rgthree-comfy)[m
+[31m-3. `widgethider.js` - FLUX LoRA Loader V1 widget visibility controller[m
+[31m-[m
+[31m-**Backup Files (moved to `backups/` directory):**[m
+[31m-- All backup files are now stored in `backups/` and excluded from git tracking[m
+[31m-- This directory is local-only and will not appear in releases[m
+[31m-[m
+[31m----[m
+[31m-[m
+[31m-## 4. Version Number Format Change[m
+[31m-[m
+[31m-**v1.12:** `version = "1.12.0"` (semantic versioning)[m
+[31m-**v1.13:** `version = "1.13"` (simplified format)[m
+[31m-[m
+[31m-**Reason:**[m
+[31m-- This is a maintenance/cleanup release, not a feature release[m
+[31m-- Simplified version format is sufficient for custom nodes[m
+[31m-- Easier to reference and communicate[m
+[31m-[m
+[31m----[m
+[31m-[m
+[31m-## 5. Verification[m
+[31m-[m
+[31m-### How to Verify Clean Installation[m
+[31m-[m
+[31m-After installing v1.13, check your `js/` directory:[m
+[31m-[m
+[31m-```bash[m
+[31m-ls custom_nodes/ComfyUI-NunchakuFluxLoraStacker/js/[m
+[31m-```[m
+[31m-[m
+[31m-**Expected output (3 files only):**[m
+[31m-```[m
+[31m-fast_bypass_v2.js[m
+[31m-widgethider.js[m
+[31m-z_flux_lora_dynamic.js[m
+[31m-```[m
+[31m-[m
+[31m-**If you see backup files:**[m
+[31m-- You may have installed from an older release[m
+[31m-- Or manually copied files from elsewhere[m
+[31m-- Solution: Delete the custom node directory and reinstall v1.13[m
+[31m-[m
+[31m-### ComfyUI Console Output[m
+[31m-[m
+[31m-On startup, you should see exactly **3** log messages from this extension:[m
+[31m-[m
+[31m-```[m
+[31m-★★★ z_flux_lora_dynamic.js: RESTORE COMBO BOX + PHYSICAL DELETE (FINAL) ★★★[m
+[31m-ComfyUI-NunchakuFluxLoraStacker: JavaScript file loaded![m
+[31m-(Fast Groups Bypasser V2 initializes silently)[m
+[31m-```[m
+[31m-[m
+[31m-**If you see duplicate messages:**[m
+[31m-- Multiple JavaScript files are being loaded[m
+[31m-- Check for backup files in `js/` directory[m
+[31m-- Clean install recommended[m
+[31m-[m
+[31m----[m
+[31m-[m
+[31m-## 6. No Functional Changes[m
+[31m-[m
+[31m-**Important:** v1.13 has **zero functional changes** from v1.12.[m
+[31m-[m
+[31m-This is a **maintenance release** focused solely on:[m
+[31m-- Repository cleanup[m
+[31m-- Source code hygiene[m
+[31m-- Distribution quality[m
+[31m-[m
+[31m-**All features from v1.12 work identically:**[m
+[31m-- FLUX LoRA Loader V2 with dynamic combo box UI[m
+[31m-- Fast Groups Bypasser V2[m
+[31m-- FLUX LoRA Loader V1 (backward compatibility)[m
+[31m-[m
+[31m-**If you are using v1.12 without issues, upgrading to v1.13 is optional.**[m
+[31m-[m
+[31m-**However, if you experience:**[m
+[31m-- Duplicate nodes in the node menu[m
+[31m-- Console errors about conflicting extensions[m
+[31m-- Unexpected behavior with FLUX LoRA Loader[m
+[31m-[m
+[31m-**Then upgrading to v1.13 is recommended.**[m
+[31m-[m
+[31m----[m
+[31m-[m
+[31m-## 7. Migration from v1.12 to v1.13[m
+[31m-[m
+[31m-### For New Installations[m
+[31m-Simply install v1.13. No migration needed.[m
+[31m-[m
+[31m-### For Existing Users (Clean Reinstall Recommended)[m
+[31m-[m
+[31m-**Option A: Clean Reinstall (Recommended)**[m
+[31m-```bash[m
+[31m-cd ComfyUI/custom_nodes[m
+[31m-rm -rf ComfyUI-NunchakuFluxLoraStacker[m
+[31m-git clone https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker.git[m
+[31m-cd ComfyUI-NunchakuFluxLoraStacker[m
+[31m-git checkout v1.13[m
+[31m-```[m
+[31m-[m
+[31m-**Option B: Update Existing Installation**[m
+[31m-```bash[m
+[31m-cd ComfyUI/custom_nodes/ComfyUI-NunchakuFluxLoraStacker[m
+[31m-git fetch origin[m
+[31m-git checkout v1.13[m
+[31m-[m
+[31m-# Manually remove backup files if they exist[m
+[31m-rm -f js/z_flux_lora_dynamic_backup_*.js[m
+[31m-rm -f js/z_flux_lora_dynamic_FINAL_WORKING_COMBO.js[m
+[31m-```[m
+[31m-[m
+[31m-**Option C: ComfyUI Manager**[m
+[31m-1. Open ComfyUI Manager[m
+[31m-2. Go to "Custom Nodes Manager"[m
+[31m-3. Find "ComfyUI-NunchakuFluxLoraStacker"[m
+[31m-4. Click "Update" or "Reinstall"[m
+[31m-[m
+[31m-### Verify Installation[m
+[31m-1. Restart ComfyUI[m
+[31m-2. Check console logs (should see 3 messages only)[m
+[31m-3. Test FLUX LoRA Loader V2 node[m
+[31m-4. Verify no duplicate nodes appear[m
+[31m-[m
+[31m----[m
+[31m-[m
+[31m-## 8. Technical Details[m
+[31m-[m
+[31m-### Git Operations Performed[m
+[31m-[m
+[31m-```bash[m
+[31m-# Remove backup files from git tracking[m
+[31m-git rm js/z_flux_lora_dynamic_backup_*.js[m
+[31m-git rm js/z_flux_lora_dynamic_FINAL_WORKING_COMBO.js[m
+[31m-[m
+[31m-# Commit changes[m
+[31m-git commit -m "Remove backup JS files from js/ directory"[m
+[31m-git push origin main[m
+[31m-[m
+[31m-# Update v1.12 tag to point to cleaned commit[m
+[31m-git tag -d v1.12[m
+[31m-git tag v1.12[m
+[31m-git push origin --delete tag v1.12[m
+[31m-git push origin v1.12[m
+[31m-[m
+[31m-# Create v1.13 release[m
+[31m-git tag v1.13[m
+[31m-git push origin v1.13[m
+[31m-```[m
+[31m-[m
+[31m-### Why v1.12 Was Also Updated[m
+[31m-[m
+[31m-**v1.12 tag was moved** to the commit where backups were removed.[m
+[31m-[m
+[31m-**Reason:**[m
+[31m-- Users who already downloaded v1.12 may have backup files[m
+[31m-- Moving the tag ensures new v1.12 downloads are clean[m
+[31m-- However, users should prefer v1.13 for clarity[m
+[31m-[m
+[31m-**Recommendation:**[m
+[31m-- Use v1.13 for new installations[m
+[31m-- v1.12 is updated but v1.13 is the canonical "clean" release[m
+[31m-[m
+[31m----[m
+[31m-[m
+[31m-## 9. Future Releases[m
+[31m-[m
+[31m-### Backup File Management Policy[m
+[31m-[m
+[31m-Going forward, all backup files will:[m
+[31m-1. Be stored in `backups/` directory[m
+[31m-2. Be excluded from git tracking (`.gitignore`)[m
+[31m-3. Never appear in releases[m
+[31m-4. Be local development artifacts only[m
+[31m-[m
+[31m-### Version Numbering[m
+[31m-[m
+[31m-- **Major.Minor format** (e.g., 1.13, 1.14)[m
+[31m-- Semantic versioning (1.x.y) reserved for significant releases if needed[m
+[31m-[m
+[31m----[m
+[31m-[m
+[31m-## 10. Credits and Acknowledgments[m
+[31m-[m
+[31m-### Development[m
+[31m-- **Author:** ussoewwin[m
+[31m-- **Repository:** https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker[m
+[31m-[m
+[31m-### Special Thanks[m
+[31m-- **rgthree-comfy** for Fast Groups Bypasser original implementation[m
+[31m-- **efficiency-nodes-comfyui** for widget visibility management patterns[m
+[31m-- **Nunchaku** team for FLUX model optimization[m
+[31m-[m
+[31m----[m
+[31m-[m
+[31m-## Summary[m
+[31m-[m
+[31m-v1.13 is a **maintenance release** that ensures:[m
+[31m-- ✅ Clean source code distribution[m
+[31m-- ✅ No backup files in downloads[m
+[31m-- ✅ No conflicts from duplicate JavaScript files[m
+[31m-- ✅ Professional repository hygiene[m
+[31m-[m
+[31m-**Functionally identical to v1.12** but with cleaner file structure.[m
+[31m-[m
+[31m-**Recommended for all users** to avoid potential conflicts.[m
+[31m-[m
+[31m----[m
+[31m-[m
+[31m-For questions or issues, please open a GitHub issue:[m
+[31m-https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/issues[m
+[31m-[m
