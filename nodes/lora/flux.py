@@ -10,8 +10,6 @@ import os
 
 import folder_paths
 
-from nunchaku.lora.flux import to_diffusers
-
 import sys
 import os
 
