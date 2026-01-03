@@ -5,6 +5,7 @@ for applying multiple LoRA weights to Nunchaku FLUX models within ComfyUI.
 This is a standalone implementation with dynamic UI control.
 """
 
+import copy
 import logging
 import os
 
@@ -226,8 +227,33 @@ class NunchakuFluxLoraStack:
                 f"got {type(actual_model_wrapper)}"
             )
 
+        # IMPORTANT:
+        # Return a NEW MODEL object (do not mutate the input model in-place).
+        # ComfyUI 0.7.x model_config objects may return None for __deepcopy__ via __getattr__,
+        # which makes copy.deepcopy(model) crash. Use ModelPatcher.clone() + shallow-copy of the inner model instead.
         ret_model = model
         ret_model_wrapper = actual_model_wrapper
+        if hasattr(model, "clone") and wrapper_class_name == "ComfyFluxWrapper":
+            ret_model = model.clone()
+            ret_model.model = copy.copy(model.model)  # allow replacing diffusion_model without touching original MODEL
+
+            transformer = actual_model_wrapper.model
+            new_wrapper = ComfyFluxWrapper(
+                transformer,
+                config=getattr(actual_model_wrapper, "config", None),
+                pulid_pipeline=getattr(actual_model_wrapper, "pulid_pipeline", None),
+                customized_forward=getattr(actual_model_wrapper, "customized_forward", None),
+                forward_kwargs=getattr(actual_model_wrapper, "forward_kwargs", None),
+            )
+            orig_dm = model.model.diffusion_model
+            if hasattr(orig_dm, "_orig_mod"):
+                outer = copy.copy(orig_dm)
+                outer._orig_mod = new_wrapper
+                ret_model.model.diffusion_model = outer
+                ret_model_wrapper = outer._orig_mod
+            else:
+                ret_model.model.diffusion_model = new_wrapper
+                ret_model_wrapper = new_wrapper
 
         # Step 4: Handle ComfyFluxWrapper case
         if wrapper_class_name == "ComfyFluxWrapper":
