@@ -1,4 +1,4 @@
-# ComfyUI-NunchakuFluxLoraStacker and any stackers for ComfyUI Nodes2.0
+# ComfyUI-NunchakuFluxLoraStacker
 
 This repository provides **five independent custom nodes** for ComfyUI:
 
@@ -165,7 +165,6 @@ This repository now includes multiple V2 nodes with enhanced functionality:
 
 ## Release History
 
-- [v1.23](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/releases/tag/v1.23) – Fix Issue #4: Removed unused `to_diffusers` import from `nunchaku.lora.flux` that caused `ModuleNotFoundError` in environments where `nunchaku.lora` module doesn't exist. ([Issue #4](https://github.com/ussoewwin/ComfyUI-NunchakuFluxLoraStacker/issues/4))
 - v1.21 – Z-Image ControlNet Union 2.1 Support: Added dynamic layer count detection for Z-Image ControlNet to support Union 2.1 models.
 - v1.18 – SDNQ LoRA Stacker V2: Added dedicated SDNQ LoRA Stacker V2 node for SDNQ quantized models with dynamic 10-slot UI (for use with [comfyui-sdnq-splited](https://github.com/ussoewwin/comfyui-sdnq-splited)). Fixed Z-Image ControlNet loading to support Union 2.0 checkpoints with filtering for size mismatches
 - v1.17 – Model Patch Loader: Added ModelPatchLoaderCustom node with CPU offload support for loading ControlNet and feature projector patches

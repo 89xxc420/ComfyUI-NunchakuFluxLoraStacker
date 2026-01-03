@@ -3,6 +3,7 @@ This module dynamically generates V2 nodes with fixed LoRA slot counts (1 to 10)
 No JavaScript required.
 """
 
+import copy
 import logging
 import os
 import folder_paths
@@ -81,24 +82,54 @@ class FluxLoraMultiLoaderBase:
         actual_wrapper = model_wrapper._orig_mod if hasattr(model_wrapper, "_orig_mod") else model_wrapper
         wrapper_class = type(actual_wrapper).__name__
 
+        # IMPORTANT:
+        # Return a NEW MODEL object (do not mutate the input model in-place).
+        # ComfyUI 0.7.x model_config objects may return None for __deepcopy__ via __getattr__,
+        # which makes copy.deepcopy(model) crash. Use ModelPatcher.clone() + shallow-copy of the inner model instead.
+        ret_model = model
+        ret_wrapper = actual_wrapper
+        if hasattr(model, "clone") and wrapper_class == "ComfyFluxWrapper":
+            ret_model = model.clone()
+            # shallow copy to allow replacing diffusion_model without touching the original MODEL
+            ret_model.model = copy.copy(model.model)
+
+            transformer = actual_wrapper.model
+            new_wrapper = ComfyFluxWrapper(
+                transformer,
+                config=getattr(actual_wrapper, "config", None),
+                pulid_pipeline=getattr(actual_wrapper, "pulid_pipeline", None),
+                customized_forward=getattr(actual_wrapper, "customized_forward", None),
+                forward_kwargs=getattr(actual_wrapper, "forward_kwargs", None),
+            )
+            # keep outer optimized wrapper if present
+            orig_dm = model.model.diffusion_model
+            if hasattr(orig_dm, "_orig_mod"):
+                outer = copy.copy(orig_dm)
+                outer._orig_mod = new_wrapper
+                ret_model.model.diffusion_model = outer
+                ret_wrapper = outer._orig_mod
+            else:
+                ret_model.model.diffusion_model = new_wrapper
+                ret_wrapper = new_wrapper
+
         if wrapper_class == "ComfyFluxWrapper":
-            actual_wrapper.loras = []
+            ret_wrapper.loras = []
             for name, strength in loras_formatted:
                 path = folder_paths.get_full_path_or_raise("loras", name)
-                actual_wrapper.loras.append((path, strength))
+                ret_wrapper.loras.append((path, strength))
         elif wrapper_class == "NunchakuFluxTransformer2dModel":
             if loras_formatted:
                 from nunchaku.lora.flux.compose import compose_lora
                 tuples = [(folder_paths.get_full_path_or_raise("loras", n), s) for n, s in loras_formatted]
                 if len(tuples) == 1:
-                    actual_wrapper.update_lora_params(tuples[0][0])
-                    actual_wrapper.set_lora_strength(tuples[0][1])
+                    ret_wrapper.update_lora_params(tuples[0][0])
+                    ret_wrapper.set_lora_strength(tuples[0][1])
                 else:
-                    actual_wrapper.update_lora_params(compose_lora(tuples))
+                    ret_wrapper.update_lora_params(compose_lora(tuples))
             else:
-                actual_wrapper.update_lora_params(None)
+                ret_wrapper.update_lora_params(None)
         
-        return (model,)
+        return (ret_model,)
 
 GENERATED_NODES = {}
 GENERATED_DISPLAY_NAMES = {}
