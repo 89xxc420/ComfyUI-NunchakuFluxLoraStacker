@@ -6,12 +6,13 @@ No JavaScript required.
 import copy
 import logging
 import os
-import folder_paths
 import sys
 
 custom_node_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if custom_node_dir not in sys.path:
     sys.path.insert(0, custom_node_dir)
+
+import folder_paths
 
 from wrappers.flux import ComfyFluxWrapper
 
